@@ -35,6 +35,7 @@ class hippy:
         self.sigma = 0.1
         self.optol = 1e-8
         self.iter  = 0
+        self.maxiters = 20
 
     def newton(self, mu):
         '''newton(self, mu):
@@ -111,7 +112,7 @@ class hippy:
         self.xi()
 
         print "Iter   alphap     alphad      xib        xic         mu"
-        while self.mu > self.optol:
+        while self.mu > self.optol and self.iter < self.maxiters:
             self.iter += 1
             muhat = min(self.mu*self.mu, self.sigma*self.mu)
             (dx, dy, ds) = self.newton(muhat)
