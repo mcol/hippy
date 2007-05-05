@@ -32,19 +32,21 @@ def stepsize(v, dv):
 class hippy:
 
     def __init__(self):
+        '''__init()__:
+        Constructor.'''
         self.sigma = 0.1
         self.optol = 1e-8
         self.iter  = 0
         self.maxiters = 20
 
     def newton(self, mu):
-        '''newton(self, mu):
+        '''newton(mu):
         Build the Newton system and compute the search direction.'''
 
         return self.normaleqns(self.x, self.y, self.s, mu)
 
     def normaleqns(self, x, y, s, mu):
-        '''normaleqns(self, x, y, s, mu):
+        '''normaleqns(x, y, s, mu):
         Find the search direction by solving the normal equations system.'''
 
         D2 = numpy.diag(x/s)
@@ -59,6 +61,8 @@ class hippy:
         return (dx, dy, ds)
 
     def read(self):
+        '''read():
+        Read the problem data.'''
         self.A = array([[0, 1, 1]])
         self.b = array([2])
         self.c = array([1, 8, 0])
@@ -96,11 +100,15 @@ class hippy:
         self.s = s + dd + 0.5 * xs / sum(s)
 
     def xi(self):
+        '''xi():
+        Compute the value of mu, xib and xic.'''
         self.mu = numpy.inner(self.x, self.s) / self.n
         self.xib = self.b - numpy.dot(self.A, self.x)
         self.xic = self.c - numpy.dot(self.At, self.y) - self.s
 
     def info(self):
+        '''info():
+        Report statistics on the solution.'''
         print
         print "Problem solved in %d iterations." % self.iter
 
