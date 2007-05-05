@@ -43,7 +43,10 @@ class hippy:
         '''newton(mu):
         Build the Newton system and compute the search direction.'''
 
-        return self.normaleqns(self.x, self.y, self.s, mu)
+        (dx, dy, ds) = self.normaleqns(self.x, self.y, self.s, mu)
+        alphap = 0.9995 * stepsize(self.x, dx)
+        alphad = 0.9995 * stepsize(self.s, ds)
+        return (dx, dy, ds, alphap, alphad)
 
     def normaleqns(self, x, y, s, mu):
         '''normaleqns(x, y, s, mu):
@@ -131,9 +134,7 @@ class hippy:
         while self.mu > self.optol and self.iter < self.maxiters:
             self.iter += 1
             muhat = min(self.mu*self.mu, self.sigma*self.mu)
-            (dx, dy, ds) = self.newton(muhat)
-            alphap = 0.9995 * stepsize(self.x, dx)
-            alphad = 0.9995 * stepsize(self.s, ds)
+            (dx, dy, ds, alphap, alphad) = self.newton(muhat)
 
             self.x += alphap * dx
             self.y += alphad * dy
