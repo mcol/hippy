@@ -106,6 +106,14 @@ class hippy:
         self.xib = self.b - numpy.dot(self.A, self.x)
         self.xic = self.c - numpy.dot(self.At, self.y) - self.s
 
+    def reportiter(self, alphap, alphad):
+        '''reportiter(alphap, alphad):
+        Print a line with some information on the iteration.'''
+        erb = linalg.norm(self.xib)
+        erc = linalg.norm(self.xic)
+        print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e" % \
+              (self.iter, alphap, alphad, erb, erc, self.mu)
+
     def info(self):
         '''info():
         Report statistics on the solution.'''
@@ -131,10 +139,7 @@ class hippy:
             self.y += alphad * dy
             self.s += alphad * ds
             self.xi()
-            erb = linalg.norm(self.xib)
-            erc = linalg.norm(self.xic)
-            print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e" % \
-                  (self.iter, alphap, alphad, erb, erc, self.mu)
+            self.reportiter(alphap, alphad)
 
         self.info()
 
