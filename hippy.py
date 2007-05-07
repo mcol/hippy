@@ -57,7 +57,7 @@ class hippy:
         M = dot(AD2, self.At)
 
         r = -s + mu/x
-        rhs = dot(AD2, self.xic - r) + self.xib
+        rhs = numpy.ravel(dot(AD2, self.xic - r)) + self.xib
         dy = linalg.solve(M, rhs)
         dx = dot(D2, numpy.ravel(dot(self.At, dy)) - self.xic + r)
         ds = r - s * dx / x
