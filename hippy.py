@@ -59,7 +59,7 @@ class hippy:
         r = -s + mu/x
         rhs = dot(AD2, self.xic - r) + self.xib
         dy = linalg.solve(M, rhs)
-        dx = dot(D2, dot(self.At, dy) - self.xic + r)
+        dx = dot(D2, numpy.ravel(dot(self.At, dy)) - self.xic + r)
         ds = r - s * dx / x
         return (dx, dy, ds)
 
@@ -85,9 +85,9 @@ class hippy:
         # AA^Ty = Ac   s = c - A^Ty
         M = dot(A, At)
         v = linalg.solve(M, self.b)
-        x = dot(At, v)
-        y = linalg.solve(M, dot(A, self.c))
-        s = self.c - dot(At, y)
+        x = numpy.ravel(dot(At, v))
+        y = linalg.solve(M, numpy.ravel(dot(A, self.c)))
+        s = self.c - numpy.ravel(dot(At, y))
 
         # shift the point
         # dp = -1.5 * min { x_i },  dd = -1.5 * min { s_i }
@@ -106,8 +106,8 @@ class hippy:
         '''xi():
         Compute the value of mu, xib and xic.'''
         self.mu = numpy.inner(self.x, self.s) / self.n
-        self.xib = self.b - dot(self.A, self.x)
-        self.xic = self.c - dot(self.At, self.y) - self.s
+        self.xib = self.b - numpy.ravel(dot(self.A, self.x))
+        self.xic = self.c - numpy.ravel(dot(self.At, self.y)) - self.s
 
     def reportiter(self, alphap, alphad):
         '''reportiter(alphap, alphad):
