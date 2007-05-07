@@ -16,7 +16,7 @@
 
 import sys
 import numpy
-from numpy import array, zeros, linalg
+from numpy import array, dot, zeros, linalg
 
 def stepsize(v, dv):
     '''stepsize(v, dv):
@@ -53,13 +53,13 @@ class hippy:
         Find the search direction by solving the normal equations system.'''
 
         D2 = numpy.diag(x/s)
-        AD2 = numpy.dot(self.A, D2)
-        M = numpy.dot(AD2, self.At)
+        AD2 = dot(self.A, D2)
+        M = dot(AD2, self.At)
 
         r = -s + mu/x
-        rhs = numpy.dot(AD2, self.xic - r) + self.xib
+        rhs = dot(AD2, self.xic - r) + self.xib
         dy = linalg.solve(M, rhs)
-        dx = numpy.dot(D2, numpy.dot(self.At, dy) - self.xic + r)
+        dx = dot(D2, dot(self.At, dy) - self.xic + r)
         ds = r - s * dx / x
         return (dx, dy, ds)
 
@@ -83,11 +83,11 @@ class hippy:
         # Mehrotra's way (following comments in OOPS)
         # AA^Tv = b    x = A^Tv
         # AA^Ty = Ac   s = c - A^Ty
-        M = numpy.dot(A, At)
+        M = dot(A, At)
         v = linalg.solve(M, self.b)
-        x = numpy.dot(At, v)
-        y = linalg.solve(M, numpy.dot(A, self.c))
-        s = self.c - numpy.dot(At, y)
+        x = dot(At, v)
+        y = linalg.solve(M, dot(A, self.c))
+        s = self.c - dot(At, y)
 
         # shift the point
         # dp = -1.5 * min { x_i },  dd = -1.5 * min { s_i }
@@ -96,7 +96,7 @@ class hippy:
         # x = x + dp,  s = s + dd
         dp = -1.5 * min(x)
         dd = -1.5 * min(s)
-        xs = numpy.dot(x + dp, s + dd)
+        xs = dot(x + dp, s + dd)
 
         self.x = x + dp + 0.5 * xs / sum(x)
         self.y = y
@@ -106,8 +106,8 @@ class hippy:
         '''xi():
         Compute the value of mu, xib and xic.'''
         self.mu = numpy.inner(self.x, self.s) / self.n
-        self.xib = self.b - numpy.dot(self.A, self.x)
-        self.xic = self.c - numpy.dot(self.At, self.y) - self.s
+        self.xib = self.b - dot(self.A, self.x)
+        self.xic = self.c - dot(self.At, self.y) - self.s
 
     def reportiter(self, alphap, alphad):
         '''reportiter(alphap, alphad):
