@@ -17,6 +17,7 @@
 import sys
 import numpy
 from numpy import array, dot, zeros, linalg
+from mps import Mps
 
 def stepsize(v, dv):
     '''stepsize(v, dv):
@@ -31,13 +32,14 @@ def stepsize(v, dv):
 
 class hippy:
 
-    def __init__(self):
+    def __init__(self, file):
         '''__init()__:
         Constructor.'''
         self.sigma = 0.1
         self.optol = 1e-8
         self.iter  = 0
         self.maxiters = 20
+        self.mpsfile = file
 
     def newton(self, mu):
         '''newton(mu):
@@ -66,18 +68,16 @@ class hippy:
     def read(self):
         '''read():
         Read the problem data.'''
-        self.A = array([[0, 1, 1]])
-        self.b = array([2])
-        self.c = array([1, 8, 0])
+        mpsdata = Mps(self.mpsfile)
+        mpsdata.readMps()
+        self.A, self.b, self.c = mpsdata.getdata()
+        self.A = self.A.todense()
         self.n = len(self.c)
         self.At = self.A.transpose()
 
     def init(self):
         '''init():
         Provide the initial iterate.'''
-        #    x = array([8, 1.95, 0.05])
-        #    y = array([-0.1])
-        #    s = array([1, 8.1, 0.1])
         A, At = self.A, self.At
 
         # Mehrotra's way (following comments in OOPS)
@@ -150,7 +150,8 @@ def main(argv = None):
     if argv is None:
         argv = sys.argv[1:]
 
-    problem = hippy()
+    mpsfile = argv[0]
+    problem = hippy(mpsfile)
     problem.solve()
 
 if __name__ == "__main__":
