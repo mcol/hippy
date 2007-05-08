@@ -56,15 +56,15 @@ class hippy:
 
         S = numpy.diagflat(s)
         X = numpy.diagflat(x)
-        D2 = X * S.I
-        AD2 = self.A * D2
-        M = AD2 * self.A.T
+        D = X * S.I
+        AD = self.A * D
+        M = AD * self.A.T
 
         e = numpy.asmatrix(numpy.ones(self.n)).T
         r = -s + numpy.multiply(mu, X.I * e)
-        rhs = AD2 * (self.xic - r) + self.xib
+        rhs = AD * (self.xic - r) + self.xib
         dy = linalg.solve(M, rhs)
-        dx = D2 * (self.A.T * dy - self.xic + r)
+        dx = D * (self.A.T * dy - self.xic + r)
         ds = r - S * dx / x
         return (dx, dy, ds)
 
