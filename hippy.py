@@ -127,8 +127,6 @@ class hippy:
     def solve(self):
         self.read()
         self.init()
-
-        A, b, c = self.A, self.b, self.c
         self.xi()
 
         print "Iter   alphap     alphad      xib        xic         mu"
