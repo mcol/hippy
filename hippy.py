@@ -64,7 +64,7 @@ class hippy:
         r = -s + numpy.multiply(mu, X.I * e)
         rhs = AD2 * (self.xic - r) + self.xib
         dy = linalg.solve(M, rhs)
-        dx = D2 * self.A.T * dy - self.xic + r
+        dx = D2 * (self.A.T * dy - self.xic + r)
         ds = r - S * dx / x
         return (dx, dy, ds)
 
