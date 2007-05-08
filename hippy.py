@@ -90,12 +90,13 @@ class hippy:
         s = self.c - numpy.ravel(dot(At, y))
 
         # shift the point
-        # dp = -1.5 * min { x_i },  dd = -1.5 * min { s_i }
+        # dp = max(-1.5 * min { x_i }, 0)
+        # dd = max(-1.5 * min { s_i }, 0)
         # xs = (x + dp)^T (s + dd) / x^Ts
         # dp = dp + 0.5 * xs / e^Tx, dd = dd + 0.5 * xs / e^Ts
         # x = x + dp,  s = s + dd
-        dp = -1.5 * min(x)
-        dd = -1.5 * min(s)
+        dp = max(-1.5 * min(x), 0)
+        dd = max(-1.5 * min(s), 0)
         xs = dot(x + dp, s + dd)
 
         self.x = x + dp + 0.5 * xs / sum(x)
