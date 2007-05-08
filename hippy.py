@@ -105,7 +105,7 @@ class hippy:
     def xi(self):
         '''xi():
         Compute the value of mu, xib and xic.'''
-        self.mu = numpy.inner(self.x, self.s) / self.n
+        self.mu = dot(self.x, self.s) / self.n
         self.xib = self.b - numpy.ravel(dot(self.A, self.x))
         self.xic = self.c - numpy.ravel(dot(self.At, self.y)) - self.s
 
