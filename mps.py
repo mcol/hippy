@@ -16,7 +16,7 @@
 
 import string
 from numpy import array
-from scipy import sparse
+from scipy import sparse, matrix
 
 class Mps:
 
@@ -40,7 +40,7 @@ class Mps:
 
     def getdata(self):
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
-        return A, array(self.rhs), array(self.obj)
+        return A, matrix(self.rhs).T, matrix(self.obj).T
 
     def __parseRows(self, mps):
 

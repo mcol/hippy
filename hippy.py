@@ -27,7 +27,7 @@ def stepsize(v, dv):
         if dv[i] < 0:
             ratio = - v[i] / dv[i]
             if ratio < alpha:
-                alpha = ratio
+                alpha = ratio.item()
     return alpha
 
 class hippy:
@@ -54,15 +54,18 @@ class hippy:
         '''normaleqns(x, y, s, mu):
         Find the search direction by solving the normal equations system.'''
 
-        D2 = numpy.diag(x/s)
-        AD2 = dot(self.A, D2)
-        M = dot(AD2, self.At)
+        S = numpy.diagflat(s)
+        X = numpy.diagflat(x)
+        D2 = X * S.I
+        AD2 = self.A * D2
+        M = AD2 * self.A.T
 
-        r = -s + mu/x
-        rhs = numpy.ravel(dot(AD2, self.xic - r)) + self.xib
+        e = numpy.asmatrix(numpy.ones(self.n)).T
+        r = -s + numpy.multiply(mu, X.I * e)
+        rhs = AD2 * (self.xic - r) + self.xib
         dy = linalg.solve(M, rhs)
-        dx = dot(D2, numpy.ravel(dot(self.At, dy)) - self.xic + r)
-        ds = r - s * dx / x
+        dx = D2 * self.A.T * dy - self.xic + r
+        ds = r - S * dx / x
         return (dx, dy, ds)
 
     def read(self):
@@ -73,21 +76,20 @@ class hippy:
         self.A, self.b, self.c = mpsdata.getdata()
         self.A = self.A.todense()
         self.n = len(self.c)
-        self.At = self.A.transpose()
 
     def init(self):
         '''init():
         Provide the initial iterate.'''
-        A, At = self.A, self.At
+        A = self.A
 
         # Mehrotra's way (following comments in OOPS)
         # AA^Tv = b    x = A^Tv
         # AA^Ty = Ac   s = c - A^Ty
-        M = dot(A, At)
+        M = A * A.T
         v = linalg.solve(M, self.b)
-        x = numpy.ravel(dot(At, v))
-        y = linalg.solve(M, numpy.ravel(dot(A, self.c)))
-        s = self.c - numpy.ravel(dot(At, y))
+        x = A.T * v
+        y = linalg.solve(M, A * self.c)
+        s = self.c - A.T * y
 
         # shift the point
         # dp = max(-1.5 * min { x_i }, 0)
@@ -95,9 +97,9 @@ class hippy:
         # xs = (x + dp)^T (s + dd) / x^Ts
         # dp = dp + 0.5 * xs / e^Tx, dd = dd + 0.5 * xs / e^Ts
         # x = x + dp,  s = s + dd
-        dp = max(-1.5 * min(x), 0)
-        dd = max(-1.5 * min(s), 0)
-        xs = dot(x + dp, s + dd)
+        dp = max(-1.5 * min(x).item(), 0)
+        dd = max(-1.5 * min(s).item(), 0)
+        xs = (x + dp).T * (s + dd)
 
         self.x = x + dp + 0.5 * xs / sum(x)
         self.y = y
@@ -106,9 +108,9 @@ class hippy:
     def xi(self):
         '''xi():
         Compute the value of mu, xib and xic.'''
-        self.mu = dot(self.x, self.s) / self.n
-        self.xib = self.b - numpy.ravel(dot(self.A, self.x))
-        self.xic = self.c - numpy.ravel(dot(self.At, self.y)) - self.s
+        self.mu  = (self.x.T * self.s / self.n).item()
+        self.xib = self.b - self.A * self.x
+        self.xic = self.c - self.A.T * self.y - self.s
 
     def reportiter(self, alphap, alphad):
         '''reportiter(alphap, alphad):
