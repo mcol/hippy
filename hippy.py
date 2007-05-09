@@ -105,6 +105,7 @@ class hippy:
         self.x = x + dp + 0.5 * xs / sum(x)
         self.y = y
         self.s = s + dd + 0.5 * xs / sum(s)
+        self.obj = self.c.T * self.x
 
     def xi(self):
         '''xi():
@@ -132,6 +133,8 @@ class hippy:
             print "The problem is infeasible."
         elif self.status is 'maxiters':
             print "Maximum number of iterations reached."
+        elif self.status is 'interrupted':
+            print "The solution of the problem failed."
         else:
             print "Unknown status."
 
@@ -151,6 +154,12 @@ class hippy:
             self.s += alphad * ds
             self.xi()
             self.reportiter(alphap, alphad)
+            obj = self.c.T * self.x
+            if obj > 2 * self.obj:
+                self.status = 'interrupted'
+                break
+            else:
+                self.obj = obj
 
         if self.iter >= self.maxiters:
             self.status = 'maxiters'
