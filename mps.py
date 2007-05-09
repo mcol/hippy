@@ -23,6 +23,7 @@ class Mps:
     def __init__(self, mpsfile):
         self.mpsfile = mpsfile
         self.rowNames = {}
+        self.rowTypes = {}
         self.objName  = None
         self.b = None
 
@@ -59,6 +60,7 @@ class Mps:
                 continue
 
             self.rowNames[line[1]] = rowIndex
+            self.rowTypes[line[1]] = line[0]
             rowIndex += 1
 
     def __parseColumns(self, mps):
@@ -90,11 +92,25 @@ class Mps:
                 data.append(float(line[4]))
                 nnnz += 1
 
-        # add the last element
+        # add slacks for inequality constraints
+        keys = self.rowTypes.keys()
+        for key in keys:
+            if self.rowTypes[key] is 'E':
+                continue
+            if self.rowTypes[key] is 'L':
+                data.append(1.0)
+            elif self.rowTypes[key] is 'G':
+                data.append(-1.0)
+
+            rows.append(self.rowNames[key])
+            ptrs.append(nnnz)
+            obj.append(0)
+            nnnz += 1
+
+       # add the last element
         ptrs.append(nnnz)
 
         self.data, self.rows, self.ptrs, self.obj = data, rows, ptrs, obj
-
 
     def __parseRhs(self, mps):
         rhs = []
