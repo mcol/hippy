@@ -40,6 +40,7 @@ class hippy:
         self.iter  = 0
         self.maxiters = 20
         self.mpsfile = file
+        self.status = None
 
     def newton(self, mu):
         '''newton(mu):
@@ -124,7 +125,15 @@ class hippy:
         '''info():
         Report statistics on the solution.'''
         print
-        print "Problem solved in %d iterations." % self.iter
+        if self.status is 'optimal':
+            print "Problem solved in %d iterations." % self.iter
+            print "Objective: ", (self.c.T * self.x).item()
+        elif self.status is 'infeasible':
+            print "The problem is infeasible."
+        elif self.status is 'maxiters':
+            print "Maximum number of iterations reached."
+        else:
+            print "Unknown status."
 
     def solve(self):
         self.read()
@@ -143,6 +152,10 @@ class hippy:
             self.xi()
             self.reportiter(alphap, alphad)
 
+        if self.iter >= self.maxiters:
+            self.status = 'maxiters'
+        else:
+            self.status = 'optimal'
         self.info()
 
 def main(argv = None):
