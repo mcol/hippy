@@ -121,5 +121,7 @@ class Mps:
                 break
 
             rhs.append(float(line[2]))
+            if len(line) > 3:
+                rhs.append(float(line[4]))
 
         self.rhs = rhs
