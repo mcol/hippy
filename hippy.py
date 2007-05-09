@@ -157,7 +157,7 @@ class hippy:
             obj = self.c.T * self.x
             if obj > 2 * self.obj:
                 self.status = 'interrupted'
-                break
+                return
             else:
                 self.obj = obj
 
@@ -165,7 +165,6 @@ class hippy:
             self.status = 'maxiters'
         else:
             self.status = 'optimal'
-        self.info()
 
 def main(argv = None):
 
@@ -176,6 +175,7 @@ def main(argv = None):
     mpsfile = argv[0]
     problem = hippy(mpsfile)
     problem.solve()
+    problem.info()
 
 if __name__ == "__main__":
     sys.exit(main())
