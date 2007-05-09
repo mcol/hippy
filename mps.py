@@ -113,15 +113,16 @@ class Mps:
         self.data, self.rows, self.ptrs, self.obj = data, rows, ptrs, obj
 
     def __parseRhs(self, mps):
-        rhs = []
+        # create a dense empty right-hand side
+        rhs = [0]*len(self.rowNames)
         for line in mps:
 
             line = string.split(line)
             if (line[0] == "ENDATA"):
                 break
 
-            rhs.append(float(line[2]))
+            rhs[self.rowNames[line[1]]] = float(line[2])
             if len(line) > 3:
-                rhs.append(float(line[4]))
+                rhs[self.rowNames[line[3]]] = float(line[4])
 
         self.rhs = rhs
