@@ -1,1 +1,13 @@
-Started on Tuesday 1 May 2007
+Hippy Interior Point methods in Python
+--------------------------------------
+
+Started on Tuesday 1 May 2007.
+
+4 May 2007
+Project imported in git.
+
+7 May 2007
+Hippy can read a problem from an MPS file.
+
+8 May 2007
+First MPS problem solved.
