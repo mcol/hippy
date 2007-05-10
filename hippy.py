@@ -30,6 +30,28 @@ def stepsize(v, dv):
                 alpha = ratio.item()
     return alpha
 
+class normalequations:
+
+    def __init__(self, A, X, S):
+        self.X = X
+        self.D = X * S.I
+        self.AD = A * self.D
+        self.M = self.AD * A.T
+
+    def setrhs(self, xib, xic, xim):
+        self.xib = xib
+        self.xic = xic
+        self.xim = xim
+
+    def solve(self):
+        r = self.X.I * self.xim
+        t = self.xic - r
+        rhs = self.AD * t + self.xib
+        dy = linalg.solve(self.M, rhs)
+        dx = self.AD.T * dy - self.D * t
+        ds = r - self.D.I * dx
+        return dx, dy, ds
+
 class hippy:
 
     def __init__(self, file):
@@ -42,48 +64,32 @@ class hippy:
         self.mpsfile = file
         self.status = None
 
-    def newton(self, mu):
-        '''newton(mu):
+    def direction(self, mu):
+        '''direction(mu):
         Build the Newton system and compute the search direction.'''
 
-        (dx, dy, ds) = self.normaleqns(self.x, self.y, self.s, mu)
-        (dx, dy, ds) = self.mehrotra(self.x, self.y, self.s, dx, dy, ds)
+        X = numpy.diagflat(self.x)
+        S = numpy.diagflat(self.s)
+        NE = normalequations(self.A, X, S)
+
+        (dx, dy, ds) = self.newton(NE, X, S, mu)
+        (dx, dy, ds) = self.mehrotra(NE, X, S, dx, dy, ds)
         alphap = 0.9995 * stepsize(self.x, dx)
         alphad = 0.9995 * stepsize(self.s, ds)
+
         return (dx, dy, ds, alphap, alphad)
 
-    def normaleqns(self, x, y, s, mu):
-        '''normaleqns(x, y, s, mu):
-        Find the search direction by solving the normal equations system.'''
+    def newton(self, NE, X, S, mu):
+        e = numpy.mat([1.0]*self.n).T
+        v = -X * S * e + numpy.multiply(mu, e)
+        NE.setrhs(self.xib, self.xic, v)
+        return NE.solve()
 
-        S = numpy.diagflat(s)
-        X = numpy.diagflat(x)
-        D = X * S.I
-        AD = self.A * D
-        M = AD * self.A.T
-
-        e = numpy.asmatrix(numpy.ones(self.n)).T
-        r = -s + numpy.multiply(mu, X.I * e)
-        rhs = AD * (self.xic - r) + self.xib
-        dy = linalg.solve(M, rhs)
-        dx = D * (self.A.T * dy - self.xic + r)
-        ds = r - S * dx / x
-        return (dx, dy, ds)
-
-    def mehrotra(self, x, y, s, dx, dy, ds):
-
-        S = numpy.diagflat(s)
-        X = numpy.diagflat(x)
-        D = X * S.I
-        AD = self.A * D
-        M = AD * self.A.T
-
-        r = -X.I * numpy.multiply(dx, ds)
-        rhs = AD * (-r)
-        my = linalg.solve(M, rhs)
-        mx = D * (self.A.T * my + r)
-        ms = r - S * mx / x
-        return (dx + mx, dy + my, ds + ms)
+    def mehrotra(self, NE, X, S, dx, dy, ds):
+        v = -numpy.multiply(dx, ds)
+        NE.setrhs(0, 0, v)
+        mx, my, ms = NE.solve()
+        return dx + mx, dy + my, ds + ms
 
     def read(self):
         '''read():
@@ -170,7 +176,7 @@ class hippy:
         while self.mu > self.optol and self.iter < self.maxiters:
             self.iter += 1
             muhat = min(self.mu*self.mu, self.sigma*self.mu)
-            (dx, dy, ds, alphap, alphad) = self.newton(muhat)
+            (dx, dy, ds, alphap, alphad) = self.direction(muhat)
 
             self.makeiter(dx, dy, ds, alphap, alphad)
             gap = self.c.T * self.x - self.b.T * self.y
