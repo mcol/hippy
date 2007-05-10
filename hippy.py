@@ -122,6 +122,13 @@ class hippy:
         print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e" % \
               (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
+    def makeiter(self, dx, dy, ds, alphap, alphad):
+        self.x += alphap * dx
+        self.y += alphad * dy
+        self.s += alphad * ds
+        self.xi()
+        self.reportiter(alphap, alphad)
+
     def info(self):
         '''info():
         Report statistics on the solution.'''
@@ -149,11 +156,7 @@ class hippy:
             muhat = min(self.mu*self.mu, self.sigma*self.mu)
             (dx, dy, ds, alphap, alphad) = self.newton(muhat)
 
-            self.x += alphap * dx
-            self.y += alphad * dy
-            self.s += alphad * ds
-            self.xi()
-            self.reportiter(alphap, alphad)
+            self.makeiter(dx, dy, ds, alphap, alphad)
             gap = self.c.T * self.x - self.b.T * self.y
             if gap > 2 * self.gap:
                 self.status = 'interrupted'
