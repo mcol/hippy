@@ -47,6 +47,7 @@ class hippy:
         Build the Newton system and compute the search direction.'''
 
         (dx, dy, ds) = self.normaleqns(self.x, self.y, self.s, mu)
+        (dx, dy, ds) = self.mehrotra(self.x, self.y, self.s, dx, dy, ds)
         alphap = 0.9995 * stepsize(self.x, dx)
         alphad = 0.9995 * stepsize(self.s, ds)
         return (dx, dy, ds, alphap, alphad)
@@ -68,6 +69,21 @@ class hippy:
         dx = D * (self.A.T * dy - self.xic + r)
         ds = r - S * dx / x
         return (dx, dy, ds)
+
+    def mehrotra(self, x, y, s, dx, dy, ds):
+
+        S = numpy.diagflat(s)
+        X = numpy.diagflat(x)
+        D = X * S.I
+        AD = self.A * D
+        M = AD * self.A.T
+
+        r = -X.I * numpy.multiply(dx, ds)
+        rhs = AD * (-r)
+        my = linalg.solve(M, rhs)
+        mx = D * (self.A.T * my + r)
+        ms = r - S * mx / x
+        return (dx + mx, dy + my, ds + ms)
 
     def read(self):
         '''read():
