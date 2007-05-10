@@ -105,7 +105,7 @@ class hippy:
         self.x = x + dp + 0.5 * xs / sum(x)
         self.y = y
         self.s = s + dd + 0.5 * xs / sum(s)
-        self.obj = self.c.T * self.x
+        self.gap = self.c.T * self.x - self.b.T * self.y
 
     def xi(self):
         '''xi():
@@ -119,8 +119,8 @@ class hippy:
         Print a line with some information on the iteration.'''
         erb = linalg.norm(self.xib)
         erc = linalg.norm(self.xic)
-        print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e" % \
-              (self.iter, alphap, alphad, erb, erc, self.mu)
+        print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e" % \
+              (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
     def info(self):
         '''info():
@@ -143,7 +143,7 @@ class hippy:
         self.init()
         self.xi()
 
-        print "Iter   alphap     alphad      xib        xic         mu"
+        print "Iter  alphap     alphad       xib\t xic\t    mu\t       gap"
         while self.mu > self.optol and self.iter < self.maxiters:
             self.iter += 1
             muhat = min(self.mu*self.mu, self.sigma*self.mu)
@@ -154,12 +154,12 @@ class hippy:
             self.s += alphad * ds
             self.xi()
             self.reportiter(alphap, alphad)
-            obj = self.c.T * self.x
-            if obj > 2 * self.obj:
+            gap = self.c.T * self.x - self.b.T * self.y
+            if gap > 2 * self.gap:
                 self.status = 'interrupted'
                 return
             else:
-                self.obj = obj
+                self.gap = gap
 
         if self.iter >= self.maxiters:
             self.status = 'maxiters'
