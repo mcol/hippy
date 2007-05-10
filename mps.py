@@ -88,6 +88,9 @@ class Mps:
             nnnz += 1
 
             if len(line) > 3:
+                if (line[3] == self.objName):
+                    obj[indx - 1] = float(line[4])
+                    continue
                 rows.append(self.rowNames[line[3]])
                 data.append(float(line[4]))
                 nnnz += 1
