@@ -19,6 +19,7 @@ from numpy import array, asmatrix, diagflat, dot, linalg, multiply, ravel, \
      zeros_like
 from scipy import linsolve
 from mps import Mps
+from scale import Scale
 
 def stepsize(v, dv):
     '''stepsize(v, dv):
@@ -99,6 +100,9 @@ class hippy:
         self.A, self.b, self.c = mpsdata.getdata()
         self.n = len(self.c)
 
+    def scale(self):
+        Scale(self.A)
+
     def init(self):
         '''init():
         Provide the initial iterate.'''
@@ -168,6 +172,7 @@ class hippy:
 
     def solve(self):
         self.read()
+        self.scale()
         self.init()
         self.xi()
 
