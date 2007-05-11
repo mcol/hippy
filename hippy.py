@@ -180,7 +180,7 @@ class hippy:
 
             self.makeiter(dx, dy, ds, alphap, alphad)
             gap = self.c.T * self.x - self.b.T * self.y
-            if gap > 2 * self.gap:
+            if gap > 2 * self.gap and self.iter > 3:
                 self.status = 'interrupted'
                 return
             else:
