@@ -72,20 +72,19 @@ class hippy:
         S = numpy.diagflat(self.s)
         NE = normalequations(self.A, X, S)
 
-        (dx, dy, ds) = self.newton(NE, X, S, mu)
-        (dx, dy, ds) = self.mehrotra(NE, X, S, dx, dy, ds)
+        (dx, dy, ds) = self.newton(NE, self.x, self.s, mu)
+        (dx, dy, ds) = self.mehrotra(NE, dx, dy, ds)
         alphap = 0.9995 * stepsize(self.x, dx)
         alphad = 0.9995 * stepsize(self.s, ds)
 
         return (dx, dy, ds, alphap, alphad)
 
-    def newton(self, NE, X, S, mu):
-        e = numpy.mat([1.0]*self.n).T
-        v = -X * S * e + numpy.multiply(mu, e)
+    def newton(self, NE, x, s, mu):
+        v = -numpy.multiply(x, s) + mu
         NE.setrhs(self.xib, self.xic, v)
         return NE.solve()
 
-    def mehrotra(self, NE, X, S, dx, dy, ds):
+    def mehrotra(self, NE, dx, dy, ds):
         v = -numpy.multiply(dx, ds)
         NE.setrhs(0, 0, v)
         mx, my, ms = NE.solve()
