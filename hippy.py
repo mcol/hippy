@@ -15,8 +15,7 @@
 #
 
 import sys
-import numpy
-from numpy import array, dot, zeros, linalg
+from numpy import array, diagflat, dot, linalg, multiply
 from mps import Mps
 
 def stepsize(v, dv):
@@ -68,8 +67,8 @@ class hippy:
         '''direction(mu):
         Build the Newton system and compute the search direction.'''
 
-        X = numpy.diagflat(self.x)
-        S = numpy.diagflat(self.s)
+        X = diagflat(self.x)
+        S = diagflat(self.s)
         NE = normalequations(self.A, X, S)
 
         (dx, dy, ds) = self.newton(NE, self.x, self.s, mu)
@@ -80,12 +79,12 @@ class hippy:
         return (dx, dy, ds, alphap, alphad)
 
     def newton(self, NE, x, s, mu):
-        v = -numpy.multiply(x, s) + mu
+        v = -multiply(x, s) + mu
         NE.setrhs(self.xib, self.xic, v)
         return NE.solve()
 
     def mehrotra(self, NE, dx, dy, ds):
-        v = -numpy.multiply(dx, ds)
+        v = -multiply(dx, ds)
         NE.setrhs(0, 0, v)
         mx, my, ms = NE.solve()
         return dx + mx, dy + my, ds + ms

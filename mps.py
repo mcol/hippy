@@ -14,9 +14,9 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
-import string
 from numpy import array
 from scipy import sparse, matrix
+from string import split
 
 class Mps:
 
@@ -25,7 +25,6 @@ class Mps:
         self.rowNames = {}
         self.rowTypes = {}
         self.objName  = None
-        self.b = None
 
     def readMps(self):
 
@@ -49,7 +48,7 @@ class Mps:
 
         for line in mps:
 
-            line = string.split(line)
+            line = split(line)
 
             if (line[0] == "COLUMNS"):
                 return
@@ -69,7 +68,7 @@ class Mps:
         data, rows, ptrs, obj = [], [], [], []
         for line in mps:
 
-            line = string.split(line)
+            line = split(line)
             if (line[0] == "RHS"):
                 break
 
@@ -120,7 +119,7 @@ class Mps:
         rhs = [0]*len(self.rowNames)
         for line in mps:
 
-            line = string.split(line)
+            line = split(line)
             if (line[0] == "ENDATA"):
                 break
 
