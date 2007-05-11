@@ -15,7 +15,9 @@
 #
 
 import sys
-from numpy import array, diagflat, dot, linalg, multiply
+from numpy import array, asmatrix, diagflat, dot, linalg, multiply, ravel, \
+     zeros_like
+from scipy import linsolve
 from mps import Mps
 
 def stepsize(v, dv):
@@ -46,7 +48,7 @@ class normalequations:
         r = self.X.I * self.xim
         t = self.xic - r
         rhs = self.AD * t + self.xib
-        dy = linalg.solve(self.M, rhs)
+        dy = asmatrix(linsolve.spsolve(self.M, ravel(rhs))).T
         dx = self.AD.T * dy - self.D * t
         ds = r - self.D.I * dx
         return dx, dy, ds
@@ -85,7 +87,7 @@ class hippy:
 
     def mehrotra(self, NE, dx, dy, ds):
         v = -multiply(dx, ds)
-        NE.setrhs(0, 0, v)
+        NE.setrhs(zeros_like(self.xib), zeros_like(self.xic), v)
         mx, my, ms = NE.solve()
         return dx + mx, dy + my, ds + ms
 
@@ -95,7 +97,6 @@ class hippy:
         mpsdata = Mps(self.mpsfile)
         mpsdata.readMps()
         self.A, self.b, self.c = mpsdata.getdata()
-        self.A = self.A.todense()
         self.n = len(self.c)
 
     def init(self):
@@ -107,9 +108,9 @@ class hippy:
         # AA^Tv = b    x = A^Tv
         # AA^Ty = Ac   s = c - A^Ty
         M = A * A.T
-        v = linalg.solve(M, self.b)
+        v = asmatrix(linsolve.spsolve(M, ravel(self.b))).T
         x = A.T * v
-        y = linalg.solve(M, A * self.c)
+        y = asmatrix(linsolve.spsolve(M, ravel(A * self.c))).T
         s = self.c - A.T * y
 
         # shift the point
