@@ -101,7 +101,7 @@ class hippy:
         self.n = len(self.c)
 
     def scale(self):
-        Scale(self.A)
+        Scale(self.A, self.b, self.c)
 
     def init(self):
         '''init():

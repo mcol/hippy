@@ -18,14 +18,33 @@ from numpy import log
 
 class Scale:
 
-    def __init__(self, A):
-        self.factor = 0.0
+    def __init__(self, A, b, c):
         self.scalefactor(A)
-        print "Scale factor:", self.factor
+        self.applyscaling(A, b, c)
+        self.scalefactor(A)
 
     def scalefactor(self, A):
         # scalefactor = Sum (log |Aij|)^2
+        factor = 0.0
+
         # loop over the nonzero entries
         for i in range(A.getnnz()):
             a = abs(A.getdata(i))
-            self.factor += log(a)**2
+            factor += log(a)**2
+        print "Scaling factor:", factor
+
+    def applyscaling(self, A, b, c):
+        # scale the matrix
+        for i in range(A.getnnz()):
+            row, col = A.rowcol(i)
+            A.data[i] *= self.rowfactor[row] * self.colfactor[col]
+
+        # scale the right-hand side
+        for i in range(len(b)):
+            b[i] *= self.rowfactor[i]
+
+        # scale the objective
+        for i in range(len(c)):
+            c[i] *= self.colfactor[i]
+
+        print "Scaling done."
