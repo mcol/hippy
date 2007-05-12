@@ -14,12 +14,14 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
-from numpy import log, zeros
+from numpy import exp, log, zeros
 
 class Scale:
 
     def __init__(self, A, b, c):
         self.scalefactor(A)
+        self.initscaling(A)
+        self.computescaling(A)
         self.applyscaling(A, b, c)
         self.scalefactor(A)
 
@@ -50,6 +52,102 @@ class Scale:
         self.rowlogs, self.rownnzs = rowlogs, rownnzs
         self.collogs, self.colnnzs = collogs, colnnzs
         
+    def __updatesk(self, residual, count):
+        sk = 0.0
+        for i in range(len(residual)):
+            sk += residual[i]**2 / count[i]
+        return sk
+
+    def __updatefactors(self, factor, oldfac, residual, count, ee, qq):
+        eeqq = ee / qq
+        for i in range(len(factor)):
+            factor[i] *= 1.0 + eeqq
+            factor[i] += residual[i] / (qq * count[i]) - oldfac[i] * eeqq
+
+    def __updateresidual(self, res1, res2, count, A, ek, qk):
+
+        len1 = len(res1)
+        rows, cols = A.shape
+        if rows == len1: swap = False
+        else:            swap = True
+
+        for i in range(len1):
+            res1[i] *= ek
+
+        for i in range(A.getnnz()):
+            row, col = A.rowcol(i)
+            if swap: row, col = col, row
+            res1[row] += res2[col] / count[col]
+
+        for i in range(len1):
+            res1[i] *= -1.0 / qk
+
+    def computescaling(self, A):
+        rows, cols = A.shape
+        nnzs  = A.getnnz()
+        iters = 0
+        toler = 0.01 * nnzs
+        rowfactor1, rowfactor2 = zeros(rows), zeros(cols)
+        colfactor1, colfactor2 = zeros(cols), zeros(cols)
+
+        for i in range(rows):
+            rowfactor1[i] = self.rowlogs[i] / self.rownnzs[i]
+            rowfactor2[i] = rowfactor1[i]
+
+        # initial residual
+        self.rowres = zeros(rows)
+        self.colres = self.collogs.copy()
+        for i in range(nnzs):
+            row, col = A.rowcol(i)
+            self.colres[col] -= rowfactor1[row]
+
+        sk1, sk = 0.0, self.__updatesk(self.colres, self.colnnzs)
+        ek1, ek, qk1, qk = 0.0, 0.0, 0.0, 1.0
+
+        while sk > toler:
+
+            case = iters % 2
+
+            if case == 0:
+                if iters > 0:
+                    rowfactor2 = rowfactor1.copy()
+                    self.__updatefactors(rowfactor1, rowfactor2, self.rowres,
+                                         self.rownnzs, ek * ek1, qk * qk1)
+                self.__updateresidual(self.rowres, self.colres,
+                                      self.colnnzs, A, ek, qk)
+                sk1, sk = sk, self.__updatesk(self.rowres, self.rownnzs)
+
+            else:
+                colfactor2 = colfactor1.copy()
+                self.__updatefactors(colfactor1, colfactor2, self.colres,
+                                     self.colnnzs, ek * ek1, qk * qk1)
+                self.__updateresidual(self.colres, self.rowres,
+                                      self.rownnzs, A, ek, qk)
+                sk1, sk = sk, self.__updatesk(self.colres, self.colnnzs)
+
+            ek1, ek = ek, qk * sk / sk1
+            qk1, qk = qk, 1.0 - ek
+            iters += 1
+
+        # final update
+        if iters > 0:
+            case = iters % 2
+            if case == 0:
+                self.__updatefactors(rowfactor1, rowfactor2, self.rowres,
+                                     self.rownnzs, ek * ek1, qk1)
+            else:
+                self.__updatefactors(colfactor1, colfactor2, self.colres,
+                                     self.colnnzs, ek * ek1, qk1)
+
+        # find the scaling factors
+        for row in range(rows):
+            rowfactor1[row] = max(exp(-rowfactor1[row]), 1.0e-8)
+        for col in range(cols):
+            colfactor1[col] = max(exp(-colfactor1[col]), 1.0e-8)
+
+        self.rowfactor = rowfactor1
+        self.colfactor = colfactor1
+
     def applyscaling(self, A, b, c):
         # scale the matrix
         for i in range(A.getnnz()):
