@@ -14,7 +14,7 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
-from numpy import log
+from numpy import log, zeros
 
 class Scale:
 
@@ -29,10 +29,27 @@ class Scale:
 
         # loop over the nonzero entries
         for i in range(A.getnnz()):
-            a = abs(A.getdata(i))
-            factor += log(a)**2
+            value   = log(abs(A.getdata(i)))
+            factor += value**2
+
         print "Scaling factor:", factor
 
+    def initscaling(self, A):
+        rows, cols = A.shape
+        rowlogs, rownnzs = zeros(rows), zeros(rows)
+        collogs, colnnzs = zeros(cols), zeros(cols)
+
+        for i in range(A.getnnz()):
+            row, col = A.rowcol(i)
+            value = log(abs(A.getdata(i)))
+            rowlogs[row] += value
+            collogs[col] += value
+            rownnzs[row] += 1
+            colnnzs[col] += 1
+
+        self.rowlogs, self.rownnzs = rowlogs, rownnzs
+        self.collogs, self.colnnzs = collogs, colnnzs
+        
     def applyscaling(self, A, b, c):
         # scale the matrix
         for i in range(A.getnnz()):
