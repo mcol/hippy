@@ -195,11 +195,18 @@ class hippy:
         else:
             self.status = 'optimal'
 
+def usage():
+    print "Usage: hippy.py <problem.mps>"
+
 def main(argv = None):
 
     # change argv if we are not running from the interactive prompt
     if argv is None:
         argv = sys.argv[1:]
+
+    if argv == []:
+        usage()
+        return 1
 
     mpsfile = argv[0]
     problem = hippy(mpsfile)
