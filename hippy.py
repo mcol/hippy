@@ -131,6 +131,7 @@ class hippy:
         self.y = y
         self.s = s + dd + 0.5 * xs / sum(s)
         self.gap = self.c.T * self.x - self.b.T * self.y
+        self.xi()
 
     def xi(self):
         '''xi():
@@ -174,7 +175,6 @@ class hippy:
         self.read()
         self.scale()
         self.init()
-        self.xi()
 
         print "Iter  alphap     alphad       xib\t xic\t    mu\t       gap"
         while self.mu > self.optol and self.iter < self.maxiters:
