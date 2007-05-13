@@ -79,7 +79,7 @@ class hippy:
         alphap = 0.9995 * stepsize(self.x, dx)
         alphad = 0.9995 * stepsize(self.s, ds)
 
-        return (dx, dy, ds, alphap, alphad)
+        self.makestep(dx, dy, ds, alphap, alphad)
 
     def newton(self, NE, x, s, mu):
         v = -multiply(x, s) + mu
@@ -147,7 +147,7 @@ class hippy:
         print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e" % \
               (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
-    def makeiter(self, dx, dy, ds, alphap, alphad):
+    def makestep(self, dx, dy, ds, alphap, alphad):
         self.x += alphap * dx
         self.y += alphad * dy
         self.s += alphad * ds
@@ -180,9 +180,8 @@ class hippy:
         while self.mu > self.optol and self.iter < self.maxiters:
             self.iter += 1
             muhat = min(self.mu*self.mu, self.sigma*self.mu)
-            (dx, dy, ds, alphap, alphad) = self.direction(muhat)
+            self.direction(muhat)
 
-            self.makeiter(dx, dy, ds, alphap, alphad)
             gap = self.c.T * self.x - self.b.T * self.y
             if gap > 2 * self.gap and self.iter > 3:
                 self.status = 'interrupted'
