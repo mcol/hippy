@@ -19,7 +19,6 @@ from numpy import exp, log, zeros
 class Scale:
 
     def __init__(self, A, b, c):
-        self.scalefactor(A)
         self.initscaling(A)
         self.computescaling(A)
         self.applyscaling(A, b, c)
@@ -41,6 +40,7 @@ class Scale:
         rowlogs, rownnzs = zeros(rows), zeros(rows)
         collogs, colnnzs = zeros(cols), zeros(cols)
 
+        factor = 0.0
         for i in range(A.getnnz()):
             row, col = A.rowcol(i)
             value = log(abs(A.getdata(i)))
@@ -48,10 +48,12 @@ class Scale:
             collogs[col] += value
             rownnzs[row] += 1
             colnnzs[col] += 1
+            factor += value**2
 
+        print "Scaling factor:", factor
         self.rowlogs, self.rownnzs = rowlogs, rownnzs
         self.collogs, self.colnnzs = collogs, colnnzs
-        
+
     def __updatesk(self, residual, count):
         sk = 0.0
         for i in range(len(residual)):
