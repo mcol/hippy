@@ -66,22 +66,22 @@ class hippy:
         self.mpsfile = file
         self.status = None
 
-    def direction(self, mu):
-        '''direction(mu):
+    def direction(self):
+        '''direction():
         Build the Newton system and compute the search direction.'''
 
         X = diagflat(self.x)
         S = diagflat(self.s)
         NE = normalequations(self.A, X, S)
 
-        (dx, dy, ds) = self.newton(NE, self.x, self.s, mu)
+        (dx, dy, ds) = self.newton(NE, self.x, self.s)
         (dx, dy, ds) = self.mehrotra(NE, dx, dy, ds)
         alphap = 0.9995 * stepsize(self.x, dx)
         alphad = 0.9995 * stepsize(self.s, ds)
 
         self.makestep(dx, dy, ds, alphap, alphad)
 
-    def newton(self, NE, x, s, mu):
+    def newton(self, NE, x, s, mu = 0.0):
         v = -multiply(x, s) + mu
         NE.setrhs(self.xib, self.xic, v)
         return NE.solve()
@@ -178,9 +178,9 @@ class hippy:
 
         print "Iter  alphap     alphad       xib\t xic\t    mu\t       gap"
         while self.mu > self.optol and self.iter < self.maxiters:
+
             self.iter += 1
-            muhat = min(self.mu*self.mu, self.sigma*self.mu)
-            self.direction(muhat)
+            self.direction()
 
             gap = self.c.T * self.x - self.b.T * self.y
             if gap > 2 * self.gap and self.iter > 3:
