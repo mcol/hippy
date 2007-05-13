@@ -59,7 +59,6 @@ class hippy:
     def __init__(self, file):
         '''__init()__:
         Constructor.'''
-        self.sigma = 0.1
         self.optol = 1e-8
         self.iter  = 0
         self.maxiters = 20
@@ -86,8 +85,16 @@ class hippy:
         NE.setrhs(self.xib, self.xic, v)
         return NE.solve()
 
+    def sigmamu(self, dx, ds):
+        alphap = stepsize(self.x, dx)
+        alphad = stepsize(self.s, ds)
+        x = self.x + alphap * dx
+        s = self.s + alphad * ds
+        g = (x.T * s).item() / (self.n * self.mu)
+        return g**3 * self.mu
+
     def mehrotra(self, NE, dx, dy, ds):
-        v = -multiply(dx, ds)
+        v = -multiply(dx, ds) + self.sigmamu(dx, ds)
         NE.setrhs(zeros_like(self.xib), zeros_like(self.xic), v)
         mx, my, ms = NE.solve()
         return dx + mx, dy + my, ds + ms
