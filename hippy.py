@@ -35,10 +35,10 @@ def stepsize(v, dv):
 class normalequations:
 
     def __init__(self, A, X, S):
+        self.A = A
         self.X = X
         self.D = X * S.I
-        self.AD = A * self.D
-        self.M = self.AD * A.T
+        self.M = self.A * self.D * self.A.T
 
     def setrhs(self, xib, xic, xim):
         self.xib = xib
@@ -48,9 +48,9 @@ class normalequations:
     def solve(self):
         r = self.X.I * self.xim
         t = self.xic - r
-        rhs = self.AD * t + self.xib
+        rhs = self.A * (self.D * t) + self.xib
         dy = asmatrix(linsolve.spsolve(self.M, ravel(rhs))).T
-        dx = self.AD.T * dy - self.D * t
+        dx = self.D * (self.A.T * dy - t)
         ds = r - self.D.I * dx
         return dx, dy, ds
 
