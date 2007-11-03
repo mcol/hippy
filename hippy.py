@@ -187,7 +187,11 @@ class hippy:
         self.read()
         self.scale()
         self.init()
+        self.solver()
+        self.info()
 
+    def solver(self):
+        '''Call the solver.'''
         print "Iter  alphap     alphad       xib\t xic\t    mu\t       gap"
         while self.mu > self.optol and self.iter < self.maxiters:
 
@@ -223,7 +227,6 @@ def main(argv = None):
     mpsfile = argv[0]
     problem = hippy(mpsfile)
     problem.solve()
-    problem.info()
 
 if __name__ == "__main__":
     sys.exit(main())
