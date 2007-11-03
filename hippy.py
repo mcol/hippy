@@ -74,10 +74,10 @@ class hippy:
 
         (dx, dy, ds) = self.newton(NE, self.x, self.s)
         (dx, dy, ds) = self.mehrotra(NE, dx, dy, ds)
-        alphap = 0.9995 * stepsize(self.x, dx)
-        alphad = 0.9995 * stepsize(self.s, ds)
+        self.alphap = 0.9995 * stepsize(self.x, dx)
+        self.alphad = 0.9995 * stepsize(self.s, ds)
 
-        self.makestep(dx, dy, ds, alphap, alphad)
+        self.makestep(dx, dy, ds)
 
     def newton(self, NE, x, s, mu = 0.0):
         '''Compute the affine-scaling direction.'''
@@ -159,8 +159,9 @@ class hippy:
         print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e" % \
               (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
-    def makestep(self, dx, dy, ds, alphap, alphad):
+    def makestep(self, dx, dy, ds):
         '''Move along the given direction and report the progress.'''
+        (alphap, alphad) = (self.alphap, self.alphad)
         self.x += alphap * dx
         self.y += alphad * dy
         self.s += alphad * ds
