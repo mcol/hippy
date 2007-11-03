@@ -21,13 +21,14 @@ from string import split
 class Mps:
 
     def __init__(self, mpsfile):
+        '''Constructor.'''
         self.mpsfile = mpsfile
         self.rowNames = {}
         self.rowTypes = {}
         self.objName  = None
 
     def readMps(self):
-
+        '''Read the MPS file.'''
         try:
             mps = open(self.mpsfile, 'r')
 
@@ -47,6 +48,7 @@ class Mps:
             raise IndexError
 
     def getdata(self):
+        '''Get the coefficient matrix and vectors from the MPS data.'''
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
         return A, matrix(self.rhs).T, matrix(self.obj).T
 

@@ -22,8 +22,7 @@ from mps import Mps
 from scale import Scale
 
 def stepsize(v, dv):
-    '''stepsize(v, dv):
-    Compute the feasible stepsize from v along the direction dv.'''
+    '''Compute the feasible stepsize from v along the direction dv.'''
     alpha = 1.0
     for i in range(len(v)):
         if dv[i] < 0:
@@ -35,17 +34,20 @@ def stepsize(v, dv):
 class normalequations:
 
     def __init__(self, A, X, S):
+        '''Constructor.'''
         self.A = A
         self.X = X
         self.D = X * S.I
         self.M = self.A * self.D * self.A.T
 
     def setrhs(self, xib, xic, xim):
+        '''Set the right-hand side for which the system must be solved.'''
         self.xib = xib
         self.xic = xic
         self.xim = xim
 
     def solve(self):
+        '''Solve the normal equations system.'''
         r = self.X.I * self.xim
         t = self.xic - r
         rhs = self.A * (self.D * t) + self.xib
@@ -57,8 +59,7 @@ class normalequations:
 class hippy:
 
     def __init__(self, file):
-        '''__init()__:
-        Constructor.'''
+        '''Constructor.'''
         self.optol = 1e-8
         self.iter  = 0
         self.maxiters = 20
@@ -66,9 +67,7 @@ class hippy:
         self.status = None
 
     def direction(self):
-        '''direction():
-        Build the Newton system and compute the search direction.'''
-
+        '''Build the Newton system and compute the search direction.'''
         X = diagflat(self.x)
         S = diagflat(self.s)
         NE = normalequations(self.A, X, S)
@@ -81,11 +80,13 @@ class hippy:
         self.makestep(dx, dy, ds, alphap, alphad)
 
     def newton(self, NE, x, s, mu = 0.0):
+        '''Compute the affine-scaling direction.'''
         v = -multiply(x, s) + mu
         NE.setrhs(self.xib, self.xic, v)
         return NE.solve()
 
     def sigmamu(self, dx, ds):
+        '''Compute the target barrier parameter for Mehrotra\'s corrector.'''
         alphap = stepsize(self.x, dx)
         alphad = stepsize(self.s, ds)
         x = self.x + alphap * dx
@@ -94,14 +95,14 @@ class hippy:
         return g**3 * self.mu
 
     def mehrotra(self, NE, dx, dy, ds):
+        '''Compute Mehrotra\'s corrector.'''
         v = -multiply(dx, ds) + self.sigmamu(dx, ds)
         NE.setrhs(zeros_like(self.xib), zeros_like(self.xic), v)
         mx, my, ms = NE.solve()
         return dx + mx, dy + my, ds + ms
 
     def read(self):
-        '''read():
-        Read the problem data.'''
+        '''Read the MPS file.'''
         mpsdata = Mps(self.mpsfile)
 
         try:
@@ -113,11 +114,11 @@ class hippy:
         self.n = len(self.c)
 
     def scale(self):
+        '''Scale the problem data.'''
         Scale(self.A, self.b, self.c)
 
     def init(self):
-        '''init():
-        Provide the initial iterate.'''
+        '''Compute the initial iterate according to Mehrotra\'s heuristic.'''
         A = self.A
 
         # Mehrotra's way (following comments in OOPS)
@@ -146,21 +147,20 @@ class hippy:
         self.xi()
 
     def xi(self):
-        '''xi():
-        Compute the value of mu, xib and xic.'''
+        '''Compute the average complementarity gap and the infeasibilities.'''
         self.mu  = (self.x.T * self.s / self.n).item()
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
 
     def reportiter(self, alphap, alphad):
-        '''reportiter(alphap, alphad):
-        Print a line with some information on the iteration.'''
+        '''Print a line with some information on the iteration.'''
         erb = linalg.norm(self.xib)
         erc = linalg.norm(self.xic)
         print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e" % \
               (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
     def makestep(self, dx, dy, ds, alphap, alphad):
+        '''Move along the given direction and report the progress.'''
         self.x += alphap * dx
         self.y += alphad * dy
         self.s += alphad * ds
@@ -168,8 +168,7 @@ class hippy:
         self.reportiter(alphap, alphad)
 
     def info(self):
-        '''info():
-        Report statistics on the solution.'''
+        '''Report statistics on the solution.'''
         print
         if self.status is 'optimal':
             print "Problem solved in %d iterations." % self.iter
@@ -184,6 +183,7 @@ class hippy:
             print "Unknown status."
 
     def solve(self):
+        '''Solve the problem, from the MPS file to the optimal solution.'''
         self.read()
         self.scale()
         self.init()
@@ -207,6 +207,7 @@ class hippy:
             self.status = 'optimal'
 
 def usage():
+    '''Report the usage message.'''
     print "Usage: hippy.py <problem.mps>"
 
 def main(argv = None):
