@@ -59,7 +59,7 @@ class Mps:
             elif (line[0] == "N"):
                 self.objName = line[1]
                 continue
-            elif (line[0] == "NAME" or line[0] == "ROWS"):
+            elif (line[0] == "NAME" or line[0] == "ROWS" or line[0] == "*"):
                 continue
 
             self.rowNames[line[1]] = rowIndex
@@ -75,6 +75,8 @@ class Mps:
             line = split(line)
             if (line[0] == "RHS"):
                 break
+            elif (line[0] == "*"):
+                continue
 
             if line[0] != prev:
                 ptrs.append(nnnz)
@@ -125,6 +127,8 @@ class Mps:
             line = split(line)
             if (line[0] == "ENDATA"):
                 break
+            elif (line[0] == "*"):
+                continue
 
             rhs[self.rowNames[line[1]]] = float(line[2])
             if len(line) > 3:
