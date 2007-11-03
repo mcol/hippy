@@ -120,6 +120,7 @@ class hippy:
 
     def init(self):
         '''Compute the initial iterate according to Mehrotra\'s heuristic.'''
+        self.iter = 0
         A = self.A
 
         # Mehrotra's way (following comments in OOPS)
@@ -148,6 +149,7 @@ class hippy:
 
     def initpoint(self, point):
         '''Provide the initial iterate.'''
+        self.iter = 0
         try:
             (self.x, self.y, self.s) = point
             self.xi()
