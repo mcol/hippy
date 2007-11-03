@@ -30,17 +30,21 @@ class Mps:
 
         try:
             mps = open(self.mpsfile, 'r')
+
+            print "Reading file", self.mpsfile + "."
+
+            self.__parseRows(mps)
+            self.__parseColumns(mps)
+            self.__parseRhs(mps)
+
+            mps.close()
+
         except IOError:
             print "Could not open file '" + self.mpsfile + "'."
             raise IOError
-
-        print "Reading file", self.mpsfile + "."
-
-        self.__parseRows(mps)
-        self.__parseColumns(mps)
-        self.__parseRhs(mps)
-
-        mps.close()
+        except IndexError:
+            print "Parsing interrupted."
+            raise IndexError
 
     def getdata(self):
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
@@ -62,6 +66,11 @@ class Mps:
             elif (line[0] == "NAME" or line[0] == "ROWS" or line[0] == "*"):
                 continue
 
+            if (len(line) != 2):
+                print "Expected exactly 2 entries in the ROWS section."
+                print "Read: ", line
+                raise IndexError
+
             self.rowNames[line[1]] = rowIndex
             self.rowTypes[line[1]] = line[0]
             rowIndex += 1
@@ -77,6 +86,11 @@ class Mps:
                 break
             elif (line[0] == "*"):
                 continue
+
+            if (len(line) != 3 and len(line) != 5):
+                print "Expected exactly 3 or 5 entries in the COLUMNS section."
+                print "Read: ", line
+                raise IndexError
 
             if line[0] != prev:
                 ptrs.append(nnnz)
@@ -129,6 +143,11 @@ class Mps:
                 break
             elif (line[0] == "*"):
                 continue
+
+            if (len(line) != 3 and len(line) != 5):
+                print "Expected exactly 3 or 5 entries in the RHS section."
+                print "Read: ", line
+                raise IndexError
 
             rhs[self.rowNames[line[1]]] = float(line[2])
             if len(line) > 3:

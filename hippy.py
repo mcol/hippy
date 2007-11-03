@@ -106,7 +106,7 @@ class hippy:
 
         try:
             mpsdata.readMps()
-        except IOError:
+        except (IOError, IndexError):
             return sys.exit(1)
 
         self.A, self.b, self.c = mpsdata.getdata()
