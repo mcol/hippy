@@ -78,6 +78,7 @@ class hippy:
         self.alphad = 0.9995 * stepsize(self.s, ds)
 
         self.makestep(dx, dy, ds)
+        self.xi()
 
     def newton(self, NE, x, s, mu = 0.0):
         '''Compute the affine-scaling direction.'''
@@ -164,13 +165,11 @@ class hippy:
               (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
     def makestep(self, dx, dy, ds):
-        '''Move along the given direction and report the progress.'''
+        '''Move along the given direction.'''
         (alphap, alphad) = (self.alphap, self.alphad)
         self.x += alphap * dx
         self.y += alphad * dy
         self.s += alphad * ds
-        self.xi()
-        self.reportiter()
 
     def info(self):
         '''Report statistics on the solution.'''
@@ -201,6 +200,7 @@ class hippy:
 
             self.iter += 1
             self.direction()
+            self.reportiter()
 
             gap = self.c.T * self.x - self.b.T * self.y
             if gap > 2 * self.gap and self.iter > 3:
