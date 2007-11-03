@@ -144,22 +144,21 @@ class hippy:
         self.x = x + dp + 0.5 * xs / sum(x)
         self.y = y
         self.s = s + dd + 0.5 * xs / sum(s)
-        self.gap = self.c.T * self.x - self.b.T * self.y
         self.xi()
 
     def initpoint(self, point):
         '''Provide the initial iterate.'''
         try:
             (self.x, self.y, self.s) = point
-            self.gap = self.c.T * self.x - self.b.T * self.y
             self.xi()
         except ValueError:
             print "The vectors given to initpoint() have the wrong dimensions."
             raise
 
     def xi(self):
-        '''Compute the average complementarity gap and the infeasibilities.'''
+        '''Compute duality gap, complementarity gap and infeasibilities.'''
         self.mu  = (self.x.T * self.s / self.n).item()
+        self.gap = self.c.T * self.x - self.b.T * self.y
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
 
@@ -208,16 +207,14 @@ class hippy:
         '''Call the solver.'''
         while self.mu > self.optol and self.iter < self.maxiters:
 
+            oldgap = self.gap
             self.iter += 1
             self.direction()
             self.reportiter()
 
-            gap = self.c.T * self.x - self.b.T * self.y
-            if gap > 2 * self.gap and self.iter > 3:
+            if self.gap > 2 * oldgap and self.iter > 3:
                 self.status = 'interrupted'
                 return
-            else:
-                self.gap = gap
 
         if self.iter >= self.maxiters:
             self.status = 'maxiters'
