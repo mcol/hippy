@@ -28,9 +28,13 @@ class Mps:
 
     def readMps(self):
 
-        print "Reading file", self.mpsfile + "."
+        try:
+            mps = open(self.mpsfile, 'r')
+        except IOError:
+            print "Could not open file '" + self.mpsfile + "'."
+            raise IOError
 
-        mps = open(self.mpsfile, 'r')
+        print "Reading file", self.mpsfile + "."
 
         self.__parseRows(mps)
         self.__parseColumns(mps)

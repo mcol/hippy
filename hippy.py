@@ -103,7 +103,12 @@ class hippy:
         '''read():
         Read the problem data.'''
         mpsdata = Mps(self.mpsfile)
-        mpsdata.readMps()
+
+        try:
+            mpsdata.readMps()
+        except IOError:
+            return sys.exit(1)
+
         self.A, self.b, self.c = mpsdata.getdata()
         self.n = len(self.c)
 
