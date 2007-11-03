@@ -210,6 +210,10 @@ class hippy:
         else:
             self.status = 'optimal'
 
+    def getsolution(self):
+        '''Retrieve the solution vectors.'''
+        return (self.x, self.y, self.s)
+
 def usage():
     '''Report the usage message.'''
     print "Usage: hippy.py <problem.mps>"
