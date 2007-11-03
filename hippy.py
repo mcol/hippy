@@ -147,6 +147,16 @@ class hippy:
         self.gap = self.c.T * self.x - self.b.T * self.y
         self.xi()
 
+    def initpoint(self, point):
+        '''Provide the initial iterate.'''
+        try:
+            (self.x, self.y, self.s) = point
+            self.gap = self.c.T * self.x - self.b.T * self.y
+            self.xi()
+        except ValueError:
+            print "The vectors given to initpoint() have the wrong dimensions."
+            raise
+
     def xi(self):
         '''Compute the average complementarity gap and the infeasibilities.'''
         self.mu  = (self.x.T * self.s / self.n).item()
