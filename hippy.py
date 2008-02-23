@@ -169,6 +169,7 @@ class hippy:
     def reportiter(self):
         '''Print a line with some information on the iteration.'''
         if (self.iter == 1):
+            print
             print "Iter  alphap     alphad       xib\t xic\t    mu\t       gap"
 
         erb, erc = self.erb, self.erc
