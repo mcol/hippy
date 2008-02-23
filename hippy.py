@@ -133,18 +133,18 @@ class hippy:
         s = self.c - A.T * y
 
         # shift the point
-        # dp = max(-1.5 * min { x_i }, 0)
-        # dd = max(-1.5 * min { s_i }, 0)
+        # dp = max(-1.5 * min { x_i }, 0.1)
+        # dd = max(-1.5 * min { s_i }, 0.1
         # xs = (x + dp)^T (s + dd) / x^Ts
         # dp = dp + 0.5 * xs / e^Tx, dd = dd + 0.5 * xs / e^Ts
         # x = x + dp,  s = s + dd
-        dp = max(-1.5 * min(x).item(), 0)
-        dd = max(-1.5 * min(s).item(), 0)
+        dp = max(-1.5 * min(x).item(), 0.1)
+        dd = max(-1.5 * min(s).item(), 0.1)
         xs = (x + dp).T * (s + dd)
 
-        self.x = x + dp + 0.5 * xs / sum(x)
+        self.x = x + dp + 0.5 * xs / max(sum(x), 0.1)
         self.y = y
-        self.s = s + dd + 0.5 * xs / sum(s)
+        self.s = s + dd + 0.5 * xs / max(sum(s), 0.1)
         self.xi()
 
     def initpoint(self, point):
