@@ -64,6 +64,7 @@ class hippy:
         self.iter  = 0
         self.maxiters = 20
         self.mpsfile = file
+        self.read()
         self.status = None
 
     def direction(self):
@@ -201,7 +202,6 @@ class hippy:
 
     def solve(self):
         '''Solve the problem, from the MPS file to the optimal solution.'''
-        self.read()
         self.scale()
         self.init()
         self.solver()
