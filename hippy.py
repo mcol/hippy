@@ -33,11 +33,11 @@ def stepsize(v, dv):
 
 class normalequations:
 
-    def __init__(self, A, X, S):
+    def __init__(self, A, x, s):
         '''Constructor.'''
         self.A = A
-        self.X = X
-        self.D = X * S.I
+        self.X = diagflat(x)
+        self.D = self.X * diagflat(s).I
         self.M = self.A * self.D * self.A.T
 
     def setrhs(self, xib, xic, xim):
@@ -69,9 +69,7 @@ class hippy:
 
     def direction(self):
         '''Build the Newton system and compute the search direction.'''
-        X = diagflat(self.x)
-        S = diagflat(self.s)
-        NE = normalequations(self.A, X, S)
+        NE = normalequations(self.A, self.x, self.s)
 
         (dx, dy, ds) = self.newton(NE, self.x, self.s)
         (dx, dy, ds) = self.mehrotra(NE, dx, dy, ds)
