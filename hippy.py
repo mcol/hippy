@@ -4,7 +4,7 @@
 #
 # Hippy Interior Point methods in Python.
 #
-# Copyright (c) 2007 Marco Colombo
+# Copyright (c) 2007, 2008 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ class hippy:
         return NE.solve()
 
     def sigmamu(self, dx, ds):
-        '''Compute the target barrier parameter for Mehrotra\'s corrector.'''
+        '''Compute the target barrier parameter for Mehrotra's corrector.'''
         alphap = stepsize(self.x, dx)
         alphad = stepsize(self.s, ds)
         x = self.x + alphap * dx
@@ -96,7 +96,7 @@ class hippy:
         return g**3 * self.mu
 
     def mehrotra(self, NE, dx, dy, ds):
-        '''Compute Mehrotra\'s corrector.'''
+        '''Compute Mehrotra's corrector.'''
         v = -multiply(dx, ds) + self.sigmamu(dx, ds)
         NE.setrhs(zeros_like(self.xib), zeros_like(self.xic), v)
         mx, my, ms = NE.solve()
@@ -119,7 +119,7 @@ class hippy:
         Scale(self.A, self.b, self.c)
 
     def init(self):
-        '''Compute the initial iterate according to Mehrotra\'s heuristic.'''
+        '''Compute the initial iterate according to Mehrotra's heuristic.'''
         self.iter = 0
         A = self.A
 
