@@ -209,7 +209,7 @@ class hippy:
 
     def solver(self):
         '''Call the solver.'''
-        while (self.mu > self.optol or \
+        while (self.mu > self.optol or abs(self.gap) > self.optol or \
                self.erb > self.optol or self.erc > self.optol) and \
                self.iter < self.maxiters:
 
