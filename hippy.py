@@ -163,15 +163,16 @@ class hippy:
         self.gap = self.c.T * self.x - self.b.T * self.y
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
+        self.erb = linalg.norm(self.xib)
+        self.erc = linalg.norm(self.xic)
 
     def reportiter(self):
         '''Print a line with some information on the iteration.'''
         if (self.iter == 1):
             print "Iter  alphap     alphad       xib\t xic\t    mu\t       gap"
 
-        erb = linalg.norm(self.xib)
-        erc = linalg.norm(self.xic)
-        (alphap, alphad) = (self.alphap, self.alphad)
+        erb, erc = self.erb, self.erc
+        alphap, alphad = self.alphap, self.alphad
         print "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e" % \
               (self.iter, alphap, alphad, erb, erc, self.mu, self.gap)
 
@@ -207,7 +208,9 @@ class hippy:
 
     def solver(self):
         '''Call the solver.'''
-        while self.mu > self.optol and self.iter < self.maxiters:
+        while (self.mu > self.optol or \
+               self.erb > self.optol or self.erc > self.optol) and \
+               self.iter < self.maxiters:
 
             oldgap = self.gap
             self.iter += 1
