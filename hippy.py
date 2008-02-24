@@ -15,7 +15,7 @@
 #
 
 import sys
-from numpy import asmatrix, diag, dot, linalg, ravel, zeros_like
+from numpy import diag, dot, linalg, zeros_like
 from scipy import linsolve
 from mps import Mps
 from scale import Scale
@@ -35,9 +35,9 @@ class normalequations:
     def __init__(self, A, x, s):
         '''Constructor.'''
         self.A = A
-        self.X = asmatrix(diag(x))
-        self.D = asmatrix(diag(x / s))
-        self.M = self.A * self.D * self.A.T
+        self.x = x
+        self.d = x / s
+        self.M = self.A * diag(self.d) * self.A.T
 
     def setrhs(self, xib, xic, xim):
         '''Set the right-hand side for which the system must be solved.'''
@@ -47,13 +47,12 @@ class normalequations:
 
     def solve(self):
         '''Solve the normal equations system.'''
-        r = ravel(self.xim * self.X.I)
+        r = self.xim / self.x
         t = self.xic - r
-        rhs = ravel(self.A * (t * self.D).T) + self.xib
+        rhs = self.A * (t * self.d) + self.xib
         dy = linsolve.spsolve(self.M, rhs)
-        dx = self.D * asmatrix(self.A.T * dy - t).T
-        ds = r - ravel(self.D.I * dx)
-        dx = ravel(dx)
+        dx = self.d * (self.A.T * dy - t)
+        ds = r - dx / self.d
         return dx, dy, ds
 
 class hippy:
