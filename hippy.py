@@ -36,7 +36,7 @@ class normalequations:
         '''Constructor.'''
         self.A = A
         self.X = asmatrix(diag(x))
-        self.D = self.X * asmatrix(diag(s)).I
+        self.D = asmatrix(diag(x / s))
         self.M = self.A * self.D * self.A.T
 
     def setrhs(self, xib, xic, xim):
