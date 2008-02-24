@@ -15,8 +15,7 @@
 #
 
 import sys
-from numpy import array, asmatrix, diagflat, dot, linalg, multiply, ravel, \
-     zeros_like
+from numpy import asmatrix, diag, dot, linalg, ravel, zeros_like
 from scipy import linsolve
 from mps import Mps
 from scale import Scale
@@ -28,7 +27,7 @@ def stepsize(v, dv):
         if dv[i] < 0:
             ratio = - v[i] / dv[i]
             if ratio < alpha:
-                alpha = ratio.item()
+                alpha = ratio
     return alpha
 
 class normalequations:
@@ -36,8 +35,8 @@ class normalequations:
     def __init__(self, A, x, s):
         '''Constructor.'''
         self.A = A
-        self.X = diagflat(x)
-        self.D = self.X * diagflat(s).I
+        self.X = asmatrix(diag(x))
+        self.D = self.X * asmatrix(diag(s)).I
         self.M = self.A * self.D * self.A.T
 
     def setrhs(self, xib, xic, xim):
@@ -48,12 +47,13 @@ class normalequations:
 
     def solve(self):
         '''Solve the normal equations system.'''
-        r = self.X.I * self.xim
+        r = ravel(self.xim * self.X.I)
         t = self.xic - r
-        rhs = self.A * (self.D * t) + self.xib
-        dy = asmatrix(linsolve.spsolve(self.M, ravel(rhs))).T
-        dx = self.D * (self.A.T * dy - t)
-        ds = r - self.D.I * dx
+        rhs = ravel(self.A * (t * self.D).T) + self.xib
+        dy = linsolve.spsolve(self.M, rhs)
+        dx = self.D * asmatrix(self.A.T * dy - t).T
+        ds = r - ravel(self.D.I * dx)
+        dx = ravel(dx)
         return dx, dy, ds
 
 class hippy:
@@ -81,7 +81,7 @@ class hippy:
 
     def newton(self, NE, x, s, mu = 0.0):
         '''Compute the affine-scaling direction.'''
-        v = -multiply(x, s) + mu
+        v = -x * s + mu
         NE.setrhs(self.xib, self.xic, v)
         return NE.solve()
 
@@ -91,12 +91,12 @@ class hippy:
         alphad = stepsize(self.s, ds)
         x = self.x + alphap * dx
         s = self.s + alphad * ds
-        g = (x.T * s).item() / (self.n * self.mu)
+        g = dot(x, s) / (self.n * self.mu)
         return g**3 * self.mu
 
     def mehrotra(self, NE, dx, dy, ds):
         '''Compute Mehrotra's corrector.'''
-        v = -multiply(dx, ds) + self.sigmamu(dx, ds)
+        v = -dx * ds + self.sigmamu(dx, ds)
         NE.setrhs(zeros_like(self.xib), zeros_like(self.xic), v)
         mx, my, ms = NE.solve()
         return dx + mx, dy + my, ds + ms
@@ -126,9 +126,9 @@ class hippy:
         # AA^Tv = b    x = A^Tv
         # AA^Ty = Ac   s = c - A^Ty
         M = A * A.T
-        v = asmatrix(linsolve.spsolve(M, ravel(self.b))).T
+        v = linsolve.spsolve(M, self.b)
         x = A.T * v
-        y = asmatrix(linsolve.spsolve(M, ravel(A * self.c))).T
+        y = linsolve.spsolve(M, A * self.c)
         s = self.c - A.T * y
 
         # shift the point
@@ -137,8 +137,8 @@ class hippy:
         # xs = (x + dp)^T (s + dd) / x^Ts
         # dp = dp + 0.5 * xs / e^Tx, dd = dd + 0.5 * xs / e^Ts
         # x = x + dp,  s = s + dd
-        dp = max(-1.5 * min(x).item(), 0.1)
-        dd = max(-1.5 * min(s).item(), 0.1)
+        dp = max(-1.5 * min(x), 0.1)
+        dd = max(-1.5 * min(s), 0.1)
         xs = (x + dp).T * (s + dd)
 
         self.x = x + dp + 0.5 * xs / max(sum(x), 0.1)
@@ -158,8 +158,8 @@ class hippy:
 
     def xi(self):
         '''Compute duality gap, complementarity gap and infeasibilities.'''
-        self.mu  = (self.x.T * self.s / self.n).item()
-        self.gap = self.c.T * self.x - self.b.T * self.y
+        self.mu  = dot(self.x, self.s) / self.n
+        self.gap = dot(self.c, self.x) - dot(self.b, self.y)
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
         self.erb = linalg.norm(self.xib)
@@ -188,7 +188,7 @@ class hippy:
         print
         if self.status is 'optimal':
             print "Problem solved in %d iterations." % self.iter
-            print "Objective: ", (self.c.T * self.x).item()
+            print "Objective: ", dot(self.c, self.x)
         elif self.status is 'infeasible':
             print "The problem is infeasible."
         elif self.status is 'maxiters':

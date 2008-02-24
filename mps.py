@@ -4,7 +4,7 @@
 #
 # Routines for files in MPS format.
 #
-# Copyright (c) 2007 Marco Colombo
+# Copyright (c) 2007, 2008 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 #
 
 from numpy import array
-from scipy import sparse, matrix
+from scipy import sparse
 from string import split
 
 class Mps:
@@ -50,7 +50,7 @@ class Mps:
     def getdata(self):
         '''Get the coefficient matrix and vectors from the MPS data.'''
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
-        return A, matrix(self.rhs).T, matrix(self.obj).T
+        return A, array(self.rhs), array(self.obj)
 
     def __parseRows(self, mps):
 
