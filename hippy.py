@@ -22,12 +22,8 @@ from scale import Scale
 
 def stepsize(v, dv):
     '''Compute the feasible stepsize from v along the direction dv.'''
-    alpha = 1.0
-    for i in range(len(v)):
-        if dv[i] < 0:
-            ratio = - v[i] / dv[i]
-            if ratio < alpha:
-                alpha = ratio
+    ratios = -v / dv
+    alpha = min(1.0, min(ratios[ratios > 0.0]))
     return alpha
 
 class normalequations:
