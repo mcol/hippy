@@ -35,17 +35,11 @@ class normalequations:
         self.d = x / s
         self.M = self.A * diag(self.d) * self.A.T
 
-    def setrhs(self, xib, xic, xim):
-        '''Set the right-hand side for which the system must be solved.'''
-        self.xib = xib
-        self.xic = xic
-        self.xim = xim
-
-    def solve(self):
-        '''Solve the normal equations system.'''
-        r = self.xim / self.x
-        t = self.xic - r
-        rhs = self.A * (t * self.d) + self.xib
+    def solve(self, xib, xic, xim):
+        '''Solve the normal equations system for the given right-hand side.'''
+        r = xim / self.x
+        t = xic - r
+        rhs = self.A * (t * self.d) + xib
         dy = linsolve.spsolve(self.M, rhs)
         dx = self.d * (self.A.T * dy - t)
         ds = r - dx / self.d
@@ -77,8 +71,7 @@ class hippy:
     def newton(self, NE, x, s, mu = 0.0):
         '''Compute the affine-scaling direction.'''
         v = -x * s + mu
-        NE.setrhs(self.xib, self.xic, v)
-        return NE.solve()
+        return NE.solve(self.xib, self.xic, v)
 
     def sigmamu(self, dx, ds):
         '''Compute the target barrier parameter for Mehrotra's corrector.'''
@@ -92,8 +85,7 @@ class hippy:
     def mehrotra(self, NE, dx, dy, ds):
         '''Compute Mehrotra's corrector.'''
         v = -dx * ds + self.sigmamu(dx, ds)
-        NE.setrhs(zeros_like(self.xib), zeros_like(self.xic), v)
-        mx, my, ms = NE.solve()
+        mx, my, ms = NE.solve(zeros_like(self.xib), zeros_like(self.xic), v)
         return dx + mx, dy + my, ds + ms
 
     def read(self):
