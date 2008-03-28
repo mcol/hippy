@@ -14,7 +14,7 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
-from numpy import array
+from numpy import array, unique
 from scipy import sparse
 from string import split
 
@@ -38,6 +38,8 @@ class Mps:
             self.__parseColumns(mps)
             self.__parseRhs(mps)
 
+            self.__deleteEmptyRows()
+
             mps.close()
 
         except IOError:
@@ -51,6 +53,39 @@ class Mps:
         '''Get the coefficient matrix and vectors from the MPS data.'''
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
         return A, array(self.rhs), array(self.obj)
+
+    def __deleteEmptyRows(self):
+
+        # create a list to reorder the rows in case empty rows are found:
+        # in each position we put the correction to the row index
+        # e.g.: rows = [0 1 0 1 3 1 3]
+        #       u = [0 1 3] (row 2 is empty)
+        #       adjust = [0 0 0 1]
+        #       so that the reordered array is
+        #       rows = [0 1 0 1 2 1 2]
+        adjust  = []
+        removed = 0
+
+        # get an ordered list of the row indices
+        u = unique(self.rows)
+
+        # go through all row indices to compute the adjustment
+        for i in range(len(u)):
+            while (u[i] != i + removed):
+                del self.rhs[i]
+                removed += 1
+                adjust.append(removed)
+            adjust.append(removed)
+
+        # from each row index subtract the number of removed rows
+        try:
+            self.rows = [i - adjust[i] for i in self.rows]
+        except:
+            print "Error in __deleteEmptyRows()."
+            raise
+
+        if (removed):
+            print "Removed %d empty rows." % removed
 
     def __parseRows(self, mps):
 
