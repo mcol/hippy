@@ -181,13 +181,15 @@ class Mps:
             elif (line[0] == "*"):
                 continue
 
-            if (len(line) != 3 and len(line) != 5):
-                print "Expected exactly 3 or 5 entries in the RHS section."
+            if (len(line) < 2 or len(line) > 5):
+                print "Expected 1 or 2 pairs of entries in the RHS section."
                 print "Read: ", line
                 raise IndexError
 
-            rhs[self.rowNames[line[1]]] = float(line[2])
-            if len(line) > 3:
-                rhs[self.rowNames[line[3]]] = float(line[4])
+            index = len(line) - 1
+            while (index > 0):
+                rhs[self.rowNames[line[index - 1]]] = float(line[index])
+                line = line[:-2]
+                index -= 2
 
         self.rhs = rhs
