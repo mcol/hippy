@@ -173,6 +173,10 @@ class Mps:
     def __parseRhs(self, mps):
         # create a dense empty right-hand side
         rhs = [0]*len(self.rowNames)
+
+        # declare the variable to be set inside a try block but used outside
+        row = 0
+
         for line in mps:
 
             line = split(line)
@@ -188,7 +192,14 @@ class Mps:
 
             index = len(line) - 1
             while (index > 0):
-                rhs[self.rowNames[line[index - 1]]] = float(line[index])
+                try:
+                    row = self.rowNames[line[index - 1]]
+                except KeyError:
+                    # ignore the assignment of right-hand side to the objective
+                    if (self.objName == line[index - 1]): pass
+                    else: raise
+
+                rhs[row] = float(line[index])
                 line = line[:-2]
                 index -= 2
 
