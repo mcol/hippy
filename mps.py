@@ -25,6 +25,7 @@ class Mps:
         self.mpsfile = mpsfile
         self.rowNames = {}
         self.rowTypes = {}
+        self.colNames = {}
         self.objName  = None
 
     def readMps(self):
@@ -37,6 +38,7 @@ class Mps:
             self.__parseRows(mps)
             self.__parseColumns(mps)
             self.__parseRhs(mps)
+            self.__parseBounds(mps)
 
             self.__deleteEmptyRows()
 
@@ -140,6 +142,7 @@ class Mps:
                 raise IndexError
 
             if line[0] != prev:
+                self.colNames[line[0]] = indx
                 ptrs.append(nnnz)
                 prev = line[0]
                 indx += 1
@@ -214,3 +217,32 @@ class Mps:
                 index -= 2
 
         self.rhs = rhs
+
+    def __parseBounds(self, mps):
+        # create a dense upper bounds vector
+        bup = [float('inf')] * len(self.colNames)
+
+        for line in mps:
+
+            line = split(line)
+            if (line[0] == "ENDATA"):
+                break
+            elif (line[0] == "*"):
+                continue
+
+            if (line[0] == "FR" or
+                line[0] == "LO" or
+                line[0] == "FX"):
+                print "Bound type", line[0], "not supported."
+                continue
+
+            if (len(line) < 3 or len(line) > 4):
+                print "Expected exactly 4 entries in the BOUNDS section."
+                print "Read: ", line
+                raise IndexError
+
+            assert(line[0] == "UP")
+
+            bup[self.colNames[line[-2]]] = float(line[-1])
+
+        self.bup = bup
