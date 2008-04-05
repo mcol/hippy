@@ -23,7 +23,11 @@ from scale import Scale
 def stepsize(v, dv):
     '''Compute the feasible stepsize from v along the direction dv.'''
     ratios = -v / dv
-    alpha = min(1.0, min(ratios[ratios > 0.0]))
+    try:
+        alpha = min(1.0, min(ratios[ratios > 0.0]))
+    except ValueError:
+        print "Warning: no negative ratio in the search direction"
+        alpha = 0.0
     return alpha
 
 class normalequations:
