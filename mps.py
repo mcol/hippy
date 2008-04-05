@@ -69,6 +69,9 @@ class Mps:
         # get an ordered list of the row indices
         u = unique(self.rows)
 
+        # original length of the rhs vector
+        rhslen = len(self.rhs)
+
         # go through all row indices to compute the adjustment
         for i in range(len(u)):
             while (u[i] != i + removed):
@@ -76,6 +79,13 @@ class Mps:
                 removed += 1
                 adjust.append(removed)
             adjust.append(removed)
+
+        # check that we have removed all empty rows from the rhs
+        rem = rhslen - (len(u) + removed)
+
+        # remove the empty rows at the end of the rhs vector
+        if (rem > 0):
+            del self.rhs[-rem:]
 
         # from each row index subtract the number of removed rows
         try:
