@@ -55,7 +55,7 @@ class hippy:
         '''Constructor.'''
         self.optol = 1e-8
         self.iter  = 0
-        self.maxiters = 20
+        self.maxiters = 30
         self.mpsfile = file
         self.read()
         self.status = None
