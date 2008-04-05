@@ -180,7 +180,7 @@ class Mps:
         for line in mps:
 
             line = split(line)
-            if (line[0] == "ENDATA"):
+            if (line[0] == "ENDATA" or line[0] == "BOUNDS"):
                 break
             elif (line[0] == "*"):
                 continue
