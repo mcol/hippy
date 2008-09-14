@@ -220,7 +220,7 @@ class Mps:
 
     def __parseBounds(self, mps):
         # create a dense upper bounds vector
-        bup = [float('inf')] * len(self.colNames)
+        bup = [float('inf')] * len(self.obj)
 
         for line in mps:
 
