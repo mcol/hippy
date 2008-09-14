@@ -41,12 +41,12 @@ class normalequations:
 
     def solve(self, xib, xic, xim):
         '''Solve the normal equations system for the given right-hand side.'''
-        r = xim / self.x
-        t = xic - r
-        rhs = self.A * (t * self.d) + xib
+        t = xim / self.x
+        r = xic - t
+        rhs = self.A * (self.d * r) + xib
         dy = linsolve.spsolve(self.M, rhs)
-        dx = self.d * (self.A.T * dy - t)
-        ds = r - dx / self.d
+        dx = self.d * (self.A.T * dy - r)
+        ds = t - dx / self.d
         return dx, dy, ds
 
 class hippy:
