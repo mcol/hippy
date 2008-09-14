@@ -106,7 +106,7 @@ class hippy:
 
     def scale(self):
         '''Scale the problem data.'''
-        Scale(self.A, self.b, self.c)
+        Scale(self.A, self.b, self.c, self.u)
 
     def init(self):
         '''Compute the initial iterate according to Mehrotra's heuristic.'''

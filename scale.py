@@ -4,7 +4,7 @@
 #
 # Routines to improve the scaling of a problem.
 #
-# Copyright (c) 2007 Marco Colombo
+# Copyright (c) 2007, 2008 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ from numpy import exp, log, zeros
 
 class Scale:
 
-    def __init__(self, A, b, c):
+    def __init__(self, A, b, c, u):
         self.initscaling(A)
         self.computescaling(A)
-        self.applyscaling(A, b, c)
+        self.applyscaling(A, b, c, u)
         self.scalefactor(A)
 
     def scalefactor(self, A):
@@ -144,7 +144,7 @@ class Scale:
         self.rowfactor = rowfactor1
         self.colfactor = colfactor1
 
-    def applyscaling(self, A, b, c):
+    def applyscaling(self, A, b, c, u):
         # scale the matrix
         for i in range(A.getnnz()):
             row, col = A.rowcol(i)
@@ -157,5 +157,6 @@ class Scale:
         # scale the objective
         for i in range(len(c)):
             c[i] *= self.colfactor[i]
+            u[i] *= self.colfactor[i]
 
         print "Scaling done."
