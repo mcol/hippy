@@ -22,7 +22,7 @@ class Scale:
         self.initscaling(A)
         self.computescaling(A)
         self.applyscaling(A, b, c, u)
-        self.scalefactor(A)
+        print "Scaling done."
 
     def scalefactor(self, A):
         # scalefactor = Sum (log |Aij|)^2
@@ -33,7 +33,7 @@ class Scale:
             value   = log(abs(A.getdata(i)))
             factor += value**2
 
-        print "Scaling factor:", factor
+        return factor
 
     def initscaling(self, A):
         rows, cols = A.shape
@@ -50,9 +50,10 @@ class Scale:
             colnnzs[col] += 1
             factor += value**2
 
-        print "Scaling factor:", factor
         self.rowlogs, self.rownnzs = rowlogs, rownnzs
         self.collogs, self.colnnzs = collogs, colnnzs
+
+        return factor
 
     def __updatesk(self, residual, count):
         sk = 0.0
@@ -158,5 +159,3 @@ class Scale:
         for i in range(len(c)):
             c[i] *= self.colfactor[i]
             u[i] *= self.colfactor[i]
-
-        print "Scaling done."
