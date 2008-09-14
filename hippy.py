@@ -101,7 +101,7 @@ class hippy:
         except (IOError, IndexError):
             return sys.exit(1)
 
-        self.A, self.b, self.c = mpsdata.getdata()
+        self.A, self.b, self.c, self.u = mpsdata.getdata()
         self.n = len(self.c)
 
     def scale(self):

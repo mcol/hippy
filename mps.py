@@ -54,7 +54,7 @@ class Mps:
     def getdata(self):
         '''Get the coefficient matrix and vectors from the MPS data.'''
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
-        return A, array(self.rhs), array(self.obj)
+        return A, array(self.rhs), array(self.obj), array(self.bup)
 
     def __deleteEmptyRows(self):
 
