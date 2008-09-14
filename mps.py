@@ -178,8 +178,13 @@ class Mps:
             obj.append(0)
             nnnz += 1
 
-       # add the last element
+        # add the last element
         ptrs.append(nnnz)
+
+        # report the number of slacks added
+        nslacks = len(obj) - len(self.colNames)
+        if (nslacks > 0):
+            print "Added %d slacks variables." % nslacks
 
         self.data, self.rows, self.ptrs, self.obj = data, rows, ptrs, obj
 
