@@ -126,15 +126,18 @@ class hippy:
         # dp = max(-1.5 * min { x_i }, 0.1)
         # dd = max(-1.5 * min { s_i }, 0.1
         # xs = (x + dp)^T (s + dd) / x^Ts
-        # dp = dp + 0.5 * xs / e^Tx, dd = dd + 0.5 * xs / e^Ts
+        # dp = dp + 0.5 * xs / sum(x + dp)
+        # dd = dd + 0.5 * xs / sum(s + dd)
         # x = x + dp,  s = s + dd
         dp = max(-1.5 * min(x), 0.1)
         dd = max(-1.5 * min(s), 0.1)
         xs = (x + dp).T * (s + dd)
+        dp += 0.5 * xs / sum(x + dp)
+        dd += 0.5 * xs / sum(s + dd)
 
-        self.x = x + dp + 0.5 * xs / max(sum(x), 0.1)
+        self.x = x + dp
         self.y = y
-        self.s = s + dd + 0.5 * xs / max(sum(s), 0.1)
+        self.s = s + dd
         self.xi()
 
     def initpoint(self, point):
