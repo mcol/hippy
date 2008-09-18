@@ -36,17 +36,18 @@ class normalequations:
         '''Constructor.'''
         self.A = A
         self.x = x
-        self.d = x / s
-        self.M = self.A * diag(self.d) * self.A.T
+        self.d = s / x
+        self.D = 1.0 / (self.d)
+        self.M = self.A * diag(self.D) * self.A.T
 
     def solve(self, xib, xic, xim):
         '''Solve the normal equations system for the given right-hand side.'''
         t = xim / self.x
         r = xic - t
-        rhs = self.A * (self.d * r) + xib
+        rhs = self.A * (self.D * r) + xib
         dy = linsolve.spsolve(self.M, rhs)
-        dx = self.d * (self.A.T * dy - r)
-        ds = t - dx / self.d
+        dx = self.D * (self.A.T * dy - r)
+        ds = t - dx * self.d
         return dx, dy, ds
 
 class hippy:
