@@ -210,7 +210,7 @@ class hippy:
             self.direction()
             self.reportiter()
 
-            if self.gap > 2 * oldgap and self.iter > 3:
+            if abs(self.gap) > 2 * abs(oldgap) and self.iter > 3:
                 self.status = 'interrupted'
                 return
 
