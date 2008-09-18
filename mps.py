@@ -112,7 +112,7 @@ class Mps:
             elif (line[0] == "N"):
                 self.objName = line[1]
                 continue
-            elif (line[0] == "NAME" or line[0] == "ROWS" or line[0] == "*"):
+            elif (line[0] == "NAME" or line[0] == "ROWS" or line[0][0] == "*"):
                 continue
 
             if (len(line) != 2):
@@ -133,7 +133,7 @@ class Mps:
             line = split(line)
             if (line[0] == "RHS"):
                 break
-            elif (line[0] == "*"):
+            elif (line[0][0] == "*"):
                 continue
 
             if (len(line) != 3 and len(line) != 5):
