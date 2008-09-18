@@ -15,7 +15,7 @@
 #
 
 import sys
-from numpy import diag, dot, linalg, zeros_like
+from numpy import diag, dot, linalg
 from scipy import linsolve
 from mps import Mps
 from scale import Scale
@@ -90,7 +90,9 @@ class hippy:
     def mehrotra(self, NE, dx, dy, ds):
         '''Compute Mehrotra's corrector.'''
         v = -dx * ds + self.sigmamu(dx, ds)
-        mx, my, ms = NE.solve(zeros_like(self.xib), zeros_like(self.xic), v)
+        zb = [0.0] * len(self.xib)
+        zc = [0.0] * len(self.xic)
+        mx, my, ms = NE.solve(zb, zc, v)
         return dx + mx, dy + my, ds + ms
 
     def read(self):
