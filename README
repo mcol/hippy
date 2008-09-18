@@ -27,3 +27,6 @@ Implemented Mehrotra's heuristic for the centering parameter.
 
 24 February 2008
 Switched to use arrays instead of matrices for vectors.
+
+18 September 20008
+Implemented the Sparsevector class.
