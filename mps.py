@@ -54,7 +54,7 @@ class Mps:
     def getdata(self):
         '''Get the coefficient matrix and vectors from the MPS data.'''
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
-        return A, array(self.rhs), array(self.obj), array(self.bup)
+        return A, array(self.rhs), array(self.obj), self.bup, self.bdx
 
     def __deleteEmptyRows(self):
 
@@ -224,8 +224,9 @@ class Mps:
         self.rhs = rhs
 
     def __parseBounds(self, mps):
-        # create a dense upper bounds vector
-        bup = [float('inf')] * len(self.obj)
+
+        # create a sparse upper bounds vector with corresponding indices
+        bup, bdx = [], []
 
         for line in mps:
 
@@ -248,6 +249,8 @@ class Mps:
 
             assert(line[0] == "UP")
 
-            bup[self.colNames[line[-2]]] = float(line[-1])
+            bup.append(float(line[-1]))
+            bdx.append(self.colNames[line[-2]])
 
         self.bup = bup
+        self.bdx = bdx

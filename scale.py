@@ -158,4 +158,7 @@ class Scale:
         # scale the objective
         for i in range(len(c)):
             c[i] *= self.colfactor[i]
-            u[i] *= self.colfactor[i]
+
+        # scale the upper bounds
+        for i in range(len(u)):
+            u[i] *= self.colfactor[u.idx[i]]

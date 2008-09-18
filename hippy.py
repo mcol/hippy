@@ -19,6 +19,7 @@ from numpy import diag, dot, linalg, zeros_like
 from scipy import linsolve
 from mps import Mps
 from scale import Scale
+from sparsevector import Sparsevector
 
 def stepsize(v, dv):
     '''Compute the feasible stepsize from v along the direction dv.'''
@@ -101,8 +102,9 @@ class hippy:
         except (IOError, IndexError):
             return sys.exit(1)
 
-        self.A, self.b, self.c, self.u = mpsdata.getdata()
+        self.A, self.b, self.c, bndVal, bndIdx = mpsdata.getdata()
         self.n = len(self.c)
+        self.u = Sparsevector(self.n, bndVal, bndIdx)
 
     def scale(self):
         '''Scale the problem data.'''
