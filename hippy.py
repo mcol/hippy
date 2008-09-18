@@ -223,6 +223,12 @@ class hippy:
         '''Retrieve the solution vectors.'''
         return (self.x, self.y, self.s)
 
+    def printiter(self):
+        '''Print the primal-dual iterate.'''
+        print "x:", self.x
+        print "y:", self.y
+        print "s:", self.s
+
 def usage():
     '''Report the usage message.'''
     print "Usage: hippy.py <problem.mps>"
