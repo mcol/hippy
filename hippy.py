@@ -27,8 +27,7 @@ def stepsize(v, dv):
     try:
         alpha = min(1.0, min(ratios[ratios > 0.0]))
     except ValueError:
-        print "Warning: no negative ratio in the search direction"
-        alpha = 0.0
+        alpha = 1.0
     return alpha
 
 class normalequations:
