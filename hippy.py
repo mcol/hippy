@@ -15,7 +15,7 @@
 #
 
 import sys
-from numpy import diag, dot, linalg
+from numpy import diag, dot
 from scipy import linsolve
 from mps import Mps
 from scale import Scale
@@ -160,8 +160,8 @@ class hippy:
         self.gap = dot(self.c, self.x) - dot(self.b, self.y)
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
-        self.erb = linalg.norm(self.xib)
-        self.erc = linalg.norm(self.xic)
+        self.erb = max(abs(self.xib))
+        self.erc = max(abs(self.xic))
 
     def reportiter(self):
         '''Print a line with some information on the iteration.'''
