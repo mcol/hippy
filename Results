@@ -5,7 +5,13 @@ bandm           18
 beaconfd        16
 blend           10
 e226            17
+fit1d           19
+fit1p           19
+grow7           19F
+grow15          18F
+grow22          21F
 israel          22
+kb2             15
 lotfi           19
 sc105           9
 sctap1          15

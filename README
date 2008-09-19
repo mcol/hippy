@@ -30,3 +30,6 @@ Switched to use arrays instead of matrices for vectors.
 
 18 September 20008
 Implemented the Sparsevector class.
+
+19 September 2008
+Implemented the upper bounds.
