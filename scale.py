@@ -161,4 +161,4 @@ class Scale:
 
         # scale the upper bounds
         for i in range(len(u)):
-            u[i] *= self.colfactor[u.idx[i]]
+            u[i] /= self.colfactor[u.idx[i]]
