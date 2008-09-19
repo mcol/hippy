@@ -39,6 +39,9 @@ class Sparsevector:
                self.val.all() == other.val.all())
         return ret
 
+    def __abs__(self):
+        return Sparsevector(self.dim, abs(self.val), self.idx)
+
     def __add__(self, other):
         if hasattr(other, "val"):
             return Sparsevector(self.dim, self.val + other.val, self.idx)
@@ -56,6 +59,9 @@ class Sparsevector:
             return Sparsevector(self.dim, self.val * other.val, self.idx)
         else:
             return Sparsevector(self.dim, self.val * other, self.idx)
+
+    def __rmul__(self, other):
+        return self * other
 
     def __div__(self, other):
         if hasattr(other, "val"):

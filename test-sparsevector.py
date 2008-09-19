@@ -72,6 +72,10 @@ class TestSparsevector(unittest.TestCase):
         res = self.v * self.lls
         self.assertEqual(res, self.vlmul)
 
+    def test_mul04(self):
+        res = 2 * self.v
+        self.assertEqual(res, self.v2)
+
     def test_div01(self):
         res = self.v2 / 2
         self.assertEqual(res, self.v)
@@ -87,6 +91,10 @@ class TestSparsevector(unittest.TestCase):
     def test_neg01(self):
         res = -self.v
         self.assertEqual(res, self.vn)
+
+    def test_abs01(self):
+        res = abs(self.vn)
+        self.assertEqual(res, self.v)
 
     def test_len01(self):
         res = len(self.v)
