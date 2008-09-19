@@ -84,8 +84,8 @@ class hippy:
         alphad = stepsize(self.s, ds)
         x = self.x + alphap * dx
         s = self.s + alphad * ds
-        g = dot(x, s) / (self.n * self.mu)
-        return g**3 * self.mu
+        g = self.average(x, s)
+        return g**3 / self.mu**2
 
     def mehrotra(self, NE, dx, dy, ds):
         '''Compute Mehrotra's corrector.'''
@@ -154,12 +154,17 @@ class hippy:
             print "The vectors given to initpoint() have the wrong dimensions."
             raise
 
+    def average(self, x, s):
+        '''Compute the average complementarity gap.'''
+        gap = dot(x, s)
+        return gap / self.n
+
     def xi(self):
         '''Compute duality gap, complementarity gap and infeasibilities.'''
         self.pobj = dot(self.c, self.x)
         self.dobj = dot(self.b, self.y)
         self.gap = self.pobj - self.dobj
-        self.mu  = dot(self.x, self.s) / self.n
+        self.mu  = self.average(self.x, self.s)
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
         self.erb = max(abs(self.xib))
