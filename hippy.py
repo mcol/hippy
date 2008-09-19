@@ -116,15 +116,21 @@ class hippy:
         '''Compute the initial iterate according to Mehrotra's heuristic.'''
         self.iter = 0
         A = self.A
+        u = self.u.todense()
 
-        # Mehrotra's way (following comments in OOPS)
-        # AA^Tv = b    x = A^Tv
-        # AA^Ty = Ac   s = c - A^Ty
-        M = A * A.T
-        v = linsolve.spsolve(M, self.b)
-        x = A.T * v
-        y = linsolve.spsolve(M, A * self.c)
-        s = self.c - A.T * y
+        # compute an initial point
+        # D = diag(1.0 if no upper bound; 0.5 if upper bound)
+        # ADA^Tv = b - ADu   x = DA^Tv + Du
+        # ADA^Ty = ADc       s = Dc - DA^Ty
+        d = [1.0] * self.n
+        for i in self.u.idx:
+            d[i] = 0.5
+        F = A * diag(d)
+        M = F * A.T
+        v = linsolve.spsolve(M, self.b - F * u)
+        x = F.T * v + d * u
+        y = linsolve.spsolve(M, F * self.c)
+        s = d * self.c - F.T * y
 
         # shift the point
         # dp = max(-1.5 * min { x_i }, 0.1)
