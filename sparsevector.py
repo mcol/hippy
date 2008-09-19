@@ -36,7 +36,7 @@ class Sparsevector:
     def __eq__(self, other):
         ret = (self.idx == other.idx and
                self.dim == other.dim and
-               self.val.all() == other.val.all())
+               (self.val == other.val).all())
         return ret
 
     def __abs__(self):
