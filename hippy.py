@@ -156,8 +156,10 @@ class hippy:
 
     def xi(self):
         '''Compute duality gap, complementarity gap and infeasibilities.'''
+        self.pobj = dot(self.c, self.x)
+        self.dobj = dot(self.b, self.y)
+        self.gap = self.pobj - self.dobj
         self.mu  = dot(self.x, self.s) / self.n
-        self.gap = dot(self.c, self.x) - dot(self.b, self.y)
         self.xib = self.b - self.A * self.x
         self.xic = self.c - self.A.T * self.y - self.s
         self.erb = max(abs(self.xib))
@@ -186,7 +188,7 @@ class hippy:
         print
         if self.status is 'optimal':
             print "Problem solved in %d iterations." % self.iter
-            print "Objective: ", dot(self.c, self.x)
+            print "Objective: ", self.pobj
         elif self.status is 'infeasible':
             print "The problem is infeasible."
         elif self.status is 'maxiters':
