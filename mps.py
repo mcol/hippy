@@ -16,7 +16,6 @@
 
 from numpy import array, unique
 from scipy import sparse
-from string import split
 
 class Mps:
 
@@ -105,8 +104,7 @@ class Mps:
 
         for line in mps:
 
-            line = split(line)
-
+            line = line.split()
             if (line[0] == "COLUMNS"):
                 return
             elif (line[0] == "N"):
@@ -130,7 +128,7 @@ class Mps:
         data, rows, ptrs, obj = [], [], [], []
         for line in mps:
 
-            line = split(line)
+            line = line.split()
             if (line[0] == "RHS"):
                 break
             elif (line[0][0] == "*"):
@@ -197,7 +195,7 @@ class Mps:
 
         for line in mps:
 
-            line = split(line)
+            line = line.split()
             if (line[0] == "ENDATA" or line[0] == "BOUNDS"):
                 break
             elif (line[0] == "*"):
@@ -230,7 +228,7 @@ class Mps:
 
         for line in mps:
 
-            line = split(line)
+            line = line.split()
             if (line[0] == "ENDATA"):
                 break
             elif (line[0] == "*"):
