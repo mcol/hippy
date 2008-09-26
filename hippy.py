@@ -118,9 +118,12 @@ class hippy:
         except (IOError, IndexError):
             return sys.exit(1)
 
-        self.A, self.b, self.c, bndVal, bndIdx = mpsdata.getdata()
+        self.A, self.b, self.c, bounds = mpsdata.getdata()
         self.n = len(self.c)
-        self.u = Sparsevector(self.n, bndVal, bndIdx)
+        uppVal, uppIdx = bounds[0:2]
+        lowVal, lowIdx = bounds[2:4]
+        self.u = Sparsevector(self.n, uppVal, uppIdx)
+        self.l = Sparsevector(self.n, lowVal, lowIdx)
 
     def scale(self):
         '''Scale the problem data.'''

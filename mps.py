@@ -53,7 +53,8 @@ class Mps:
     def getdata(self):
         '''Get the coefficient matrix and vectors from the MPS data.'''
         A = sparse.csc_matrix((array(self.data), self.rows, self.ptrs))
-        return A, array(self.rhs), array(self.obj), self.bup, self.bdx
+        bounds = self.bup, self.upx, self.blo, self.lox
+        return A, array(self.rhs), array(self.obj), bounds
 
     def __deleteEmptyRows(self):
 
@@ -223,8 +224,9 @@ class Mps:
 
     def __parseBounds(self, mps):
 
-        # create a sparse upper bounds vector with corresponding indices
-        bup, bdx = [], []
+        # create sparse vectors for the bounds
+        bup, upx = [], []
+        blo, lox = [], []
 
         for line in mps:
 
@@ -235,7 +237,6 @@ class Mps:
                 continue
 
             if (line[0] == "FR" or
-                line[0] == "LO" or
                 line[0] == "FX"):
                 print "Bound type", line[0], "not supported."
                 continue
@@ -245,10 +246,13 @@ class Mps:
                 print "Read: ", line
                 raise IndexError
 
-            assert(line[0] == "UP")
+            if(line[0] == "UP"):
+                bup.append(float(line[-1]))
+                upx.append(self.colNames[line[-2]])
 
-            bup.append(float(line[-1]))
-            bdx.append(self.colNames[line[-2]])
+            elif (line[0] == "LO"):
+                blo.append(float(line[-1]))
+                lox.append(self.colNames[line[-2]])
 
-        self.bup = bup
-        self.bdx = bdx
+        self.bup, self.upx = bup, upx
+        self.blo, self.lox = blo, lox
