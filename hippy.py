@@ -103,8 +103,8 @@ class hippy:
         m = self.sigmamu(dx, ds, dz, dw)
         v = -dx * ds + m
         t = -dz * dw + m
-        zb = [0.0] * len(self.xib)
-        zc = [0.0] * len(self.xic)
+        zb = [0.0] * self.m
+        zc = [0.0] * self.n
         zu = Sparsevector(self.n, [0.0] * len(t), t.idx)
         mx, my, ms, mz, mw = NE.solve(zb, zc, v, zu, t)
         return dx + mx, dy + my, ds + ms, dz + mz, dw + mw
@@ -119,6 +119,7 @@ class hippy:
             return sys.exit(1)
 
         self.A, self.b, self.c, bounds = mpsdata.getdata()
+        self.m = len(self.b)
         self.n = len(self.c)
         uppVal, uppIdx = bounds[0:2]
         lowVal, lowIdx = bounds[2:4]
@@ -141,7 +142,7 @@ class hippy:
             self.c[i] /= colfactor[i]
             self.x[i] *= colfactor[i]
             self.s[i] /= colfactor[i]
-        for i in range(len(self.b)):
+        for i in range(self.m):
             self.b[i] /= rowfactor[i]
             self.y[i] *= rowfactor[i]
         for i in range(len(self.u)):
