@@ -124,7 +124,27 @@ class hippy:
 
     def scale(self):
         '''Scale the problem data.'''
-        Scale(self.A, self.b, self.c, self.u)
+        self.scaling = Scale(self.A, self.b, self.c, self.u)
+
+    def unscale(self):
+        '''Restore the original scaling of the data and the solution.'''
+        try:
+            rowfactor = self.scaling.rowfactor
+            colfactor = self.scaling.colfactor
+        except AttributeError:
+            return
+
+        for i in range(self.n):
+            self.c[i] /= colfactor[i]
+            self.x[i] *= colfactor[i]
+            self.s[i] /= colfactor[i]
+        for i in range(len(self.b)):
+            self.b[i] /= rowfactor[i]
+            self.y[i] *= rowfactor[i]
+        for i in range(len(self.u)):
+            self.u[i] *= colfactor[self.u.idx[i]]
+            self.z[i] /= colfactor[self.u.idx[i]]
+            self.w[i] /= colfactor[self.u.idx[i]]
 
     def init(self):
         '''Compute the initial iterate according to Mehrotra's heuristic.'''
@@ -265,6 +285,7 @@ class hippy:
             self.status = 'maxiters'
         else:
             self.status = 'optimal'
+            self.unscale()
 
     def getsolution(self):
         '''Retrieve the solution vectors.'''
