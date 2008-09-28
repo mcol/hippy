@@ -125,6 +125,27 @@ class hippy:
         lowVal, lowIdx = bounds[2:4]
         self.u = Sparsevector(self.n, uppVal, uppIdx)
         self.l = Sparsevector(self.n, lowVal, lowIdx)
+        self.shiftbounds()
+
+    def shiftbounds(self):
+        '''Shift the lower bounded variables.'''
+        l = self.l.todense()
+
+        # shift the objective
+        self.objshift = dot(self.c, l)
+
+        # shift the right-hand side
+        self.b -= self.A * l
+
+        # shift the upper bounds
+        for i in range(len(self.u)):
+            self.u[i] -= l[self.u.idx[i]]
+
+    def removeshift(self):
+        '''Remove the shift from the lower bounded variables.'''
+        self.x    += self.l.todense()
+        self.pobj += self.objshift
+        self.dobj += self.objshift
 
     def scale(self):
         '''Scale the problem data.'''
@@ -290,6 +311,7 @@ class hippy:
         else:
             self.status = 'optimal'
             self.unscale()
+            self.removeshift()
 
     def getsolution(self):
         '''Retrieve the solution vectors.'''
