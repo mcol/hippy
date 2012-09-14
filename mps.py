@@ -106,6 +106,8 @@ class Mps:
         for line in mps:
 
             line = line.split()
+            if (len(line) == 0):
+                continue
             if (line[0] == "COLUMNS"):
                 return
             elif (line[0] == "N"):
