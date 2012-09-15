@@ -161,17 +161,16 @@ class hippy:
         except AttributeError:
             return
 
-        for i in range(self.n):
-            self.c[i] /= colfactor[i]
-            self.x[i] *= colfactor[i]
-            self.s[i] /= colfactor[i]
-        for i in range(self.m):
-            self.b[i] /= rowfactor[i]
-            self.y[i] *= rowfactor[i]
+        self.c /= colfactor
+        self.x *= colfactor
+        self.s /= colfactor
+        self.b /= rowfactor
+        self.y *= rowfactor
         for i in range(len(self.u)):
-            self.u[i] *= colfactor[self.u.idx[i]]
-            self.z[i] /= colfactor[self.u.idx[i]]
-            self.w[i] /= colfactor[self.u.idx[i]]
+            factor = colfactor[self.u.idx[i]]
+            self.u[i] *= factor
+            self.z[i] /= factor
+            self.w[i] /= factor
 
     def init(self):
         '''Compute the initial iterate according to Mehrotra's heuristic.'''

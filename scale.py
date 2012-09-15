@@ -14,7 +14,7 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
-from numpy import exp, log, zeros
+from numpy import exp, log, maximum, zeros
 
 class Scale:
 
@@ -26,14 +26,8 @@ class Scale:
 
     def scalefactor(self, A):
         # scalefactor = Sum (log |Aij|)^2
-        factor = 0.0
-
-        # loop over the nonzero entries
-        for i in range(A.getnnz()):
-            value   = log(abs(A.data[i]))
-            factor += value**2
-
-        return factor
+        values = log(abs(A.data))**2
+        return sum(values)
 
     def initscaling(self, A):
         rows, cols = A.shape
@@ -42,9 +36,10 @@ class Scale:
 
         factor = 0.0
         rowidx, colidx = A.nonzero()
+        values = log(abs(A.data))
         for i in range(A.getnnz()):
             row, col = rowidx[i], colidx[i]
-            value = log(abs(A.data[i]))
+            value = values[i]
             rowlogs[row] += value
             collogs[col] += value
             rownnzs[row] += 1
@@ -57,48 +52,36 @@ class Scale:
         return factor
 
     def __updatesk(self, residual, count):
-        sk = 0.0
-        for i in range(len(residual)):
-            sk += residual[i]**2 / count[i]
+        sk = sum(residual**2 / count)
         return sk
 
     def __updatefactors(self, factor, oldfac, residual, count, ee, qq):
         eeqq = ee / qq
-        for i in range(len(factor)):
-            factor[i] *= 1.0 + eeqq
-            factor[i] += residual[i] / (qq * count[i]) - oldfac[i] * eeqq
+        factor *= 1.0 + eeqq
+        factor += residual / (qq * count) - oldfac * eeqq
 
     def __updateresidual(self, res1, res2, count, A, ek, qk):
 
-        len1 = len(res1)
-        rows, cols = A.shape
-        if rows == len1: swap = False
-        else:            swap = True
-
-        for i in range(len1):
-            res1[i] *= ek
-
         rowidx, colidx = A.nonzero()
+        if A.shape[0] != len(res1): rowidx, colidx = colidx, rowidx
+
+        res1 *= ek
         for i in range(A.getnnz()):
             row, col = rowidx[i], colidx[i]
-            if swap: row, col = col, row
             res1[row] += res2[col] / count[col]
-
-        for i in range(len1):
-            res1[i] *= -1.0 / qk
+        res1 *= -1.0 / qk
 
     def computescaling(self, A):
         rows, cols = A.shape
         nnzs  = A.getnnz()
         iters = 0
         toler = 0.01 * nnzs
-        rowfactor1, rowfactor2 = zeros(rows), zeros(cols)
+        rowfactor1 = zeros(rows)
         colfactor1, colfactor2 = zeros(cols), zeros(cols)
         rownnzs, colnnzs = self.rownnzs, self.colnnzs
 
-        for i in range(rows):
-            rowfactor1[i] = self.rowlogs[i] / rownnzs[i]
-            rowfactor2[i] = rowfactor1[i]
+        rowfactor1 = self.rowlogs / rownnzs
+        rowfactor2 = rowfactor1.copy()
 
         # initial residual
         rowres = zeros(rows)
@@ -140,28 +123,19 @@ class Scale:
                                      colnnzs, ek * ek1, qk1)
 
         # find the scaling factors
-        for row in range(rows):
-            rowfactor1[row] = max(exp(-rowfactor1[row]), 1.0e-8)
-        for col in range(cols):
-            colfactor1[col] = max(exp(-colfactor1[col]), 1.0e-8)
-
-        self.rowfactor = rowfactor1
-        self.colfactor = colfactor1
+        self.rowfactor = maximum(exp(-rowfactor1), 1.0e-8)
+        self.colfactor = maximum(exp(-colfactor1), 1.0e-8)
 
     def applyscaling(self, A, b, c, u):
         # scale the matrix
         rowidx, colidx = A.nonzero()
-        for i in range(A.getnnz()):
-            row, col = rowidx[i], colidx[i]
-            A.data[i] *= self.rowfactor[row] * self.colfactor[col]
+        A.data *= self.rowfactor[rowidx] * self.colfactor[colidx]
 
         # scale the right-hand side
-        for i in range(len(b)):
-            b[i] *= self.rowfactor[i]
+        b *= self.rowfactor
 
         # scale the objective
-        for i in range(len(c)):
-            c[i] *= self.colfactor[i]
+        c *= self.colfactor
 
         # scale the upper bounds
         for i in range(len(u)):
