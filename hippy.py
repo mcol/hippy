@@ -291,6 +291,7 @@ class hippy:
         self.init()
         self.solver()
         self.info()
+        return self.status
 
     def solver(self):
         '''Call the solver.'''
