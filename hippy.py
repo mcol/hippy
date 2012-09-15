@@ -4,7 +4,7 @@
 #
 # Hippy Interior Point methods in Python.
 #
-# Copyright (c) 2007, 2008 Marco Colombo
+# Copyright (c) 2007, 2008, 2012 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,9 @@
 #
 
 import sys
-from numpy import diag, dot
-from scipy import linsolve
+from numpy import dot
+from scipy.sparse import spdiags
+from scipy.sparse.linalg import spsolve
 from mps import Mps
 from scale import Scale
 from sparsevector import Sparsevector
@@ -40,7 +41,8 @@ class normalequations:
         self.d = s / x
         self.f = w / z
         self.D = 1.0 / (self.d + self.f.todense())
-        self.M = self.A * diag(self.D) * self.A.T
+        n = len(self.D)
+        self.M = self.A * spdiags(self.D, 0, n, n) * self.A.T
 
     def solve(self, xib, xic, xim, xiu, xiz):
         '''Solve the normal equations system for the given right-hand side.'''
@@ -48,7 +50,7 @@ class normalequations:
         v = xiz / self.z - xiu * self.f
         r = xic - t + v.todense()
         rhs = self.A * (self.D * r) + xib
-        dy = linsolve.spsolve(self.M, rhs)
+        dy = spsolve(self.M, rhs)
         dx = self.D * (self.A.T * dy - r)
         ds = t - dx * self.d
         xx = dx[xiu.idx]
@@ -184,11 +186,11 @@ class hippy:
         d = [1.0] * self.n
         for i in self.u.idx:
             d[i] = 0.5
-        F = A * diag(d)
+        F = A * spdiags(d, 0, self.n, self.n)
         M = F * A.T
-        v = linsolve.spsolve(M, self.b - F * u)
+        v = spsolve(M, self.b - F * u)
         x = F.T * v + d * u
-        y = linsolve.spsolve(M, F * self.c)
+        y = spsolve(M, F * self.c)
         s = d * self.c - F.T * y
         z = self.u - x[self.u.idx]
         w = Sparsevector(self.n, -s[self.u.idx], self.u.idx)

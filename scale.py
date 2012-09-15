@@ -4,7 +4,7 @@
 #
 # Routines to improve the scaling of a problem.
 #
-# Copyright (c) 2007, 2008 Marco Colombo
+# Copyright (c) 2007, 2008, 2012 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ class Scale:
 
         # loop over the nonzero entries
         for i in range(A.getnnz()):
-            value   = log(abs(A.getdata(i)))
+            value   = log(abs(A.data[i]))
             factor += value**2
 
         return factor
@@ -41,9 +41,10 @@ class Scale:
         collogs, colnnzs = zeros(cols), zeros(cols)
 
         factor = 0.0
+        rowidx, colidx = A.nonzero()
         for i in range(A.getnnz()):
-            row, col = A.rowcol(i)
-            value = log(abs(A.getdata(i)))
+            row, col = rowidx[i], colidx[i]
+            value = log(abs(A.data[i]))
             rowlogs[row] += value
             collogs[col] += value
             rownnzs[row] += 1
@@ -77,8 +78,9 @@ class Scale:
         for i in range(len1):
             res1[i] *= ek
 
+        rowidx, colidx = A.nonzero()
         for i in range(A.getnnz()):
-            row, col = A.rowcol(i)
+            row, col = rowidx[i], colidx[i]
             if swap: row, col = col, row
             res1[row] += res2[col] / count[col]
 
@@ -101,8 +103,9 @@ class Scale:
         # initial residual
         rowres = zeros(rows)
         colres = self.collogs.copy()
+        rowidx, colidx = A.nonzero()
         for i in range(nnzs):
-            row, col = A.rowcol(i)
+            row, col = rowidx[i], colidx[i]
             colres[col] -= rowfactor1[row]
 
         sk1, sk = 0.0, self.__updatesk(colres, colnnzs)
@@ -147,8 +150,9 @@ class Scale:
 
     def applyscaling(self, A, b, c, u):
         # scale the matrix
+        rowidx, colidx = A.nonzero()
         for i in range(A.getnnz()):
-            row, col = A.rowcol(i)
+            row, col = rowidx[i], colidx[i]
             A.data[i] *= self.rowfactor[row] * self.colfactor[col]
 
         # scale the right-hand side
