@@ -276,11 +276,14 @@ class hippy:
         if self.status is 'optimal':
             print "Problem solved in %d iterations." % self.iter
             print "Objective: ", self.pobj
+        elif self.status is 'suboptimal':
+            print "Suboptimal solution found in %d iterations." % self.iter
+            print "Objective: ", self.pobj
         elif self.status is 'infeasible':
             print "The problem is infeasible."
         elif self.status is 'maxiters':
             print "Maximum number of iterations reached."
-        elif self.status is 'interrupted':
+        elif self.status is 'failed':
             print "The solution of the problem failed."
         else:
             print "Unknown status."
@@ -305,7 +308,12 @@ class hippy:
             self.reportiter()
 
             if abs(self.gap) > 2 * abs(oldgap) and self.iter > 3:
-                self.status = 'interrupted'
+                if self.mu < self.optol:
+                    self.status = 'suboptimal'
+                    self.unscale()
+                    self.removeshift()
+                else:
+                    self.status = 'failed'
                 return
 
         if self.iter >= self.maxiters:
