@@ -4,7 +4,7 @@
 #
 # Routines for files in MPS format.
 #
-# Copyright (c) 2007, 2008 Marco Colombo
+# Copyright (c) 2007, 2008, 2012 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,8 +46,8 @@ class Mps:
         except IOError:
             print "Could not open file '" + self.mpsfile + "'."
             raise IOError
-        except IndexError:
-            print "Parsing interrupted."
+        except (IndexError, NotImplementedError):
+            print "Parsing of the MPS file interrupted."
             raise IndexError
 
     def getdata(self):
@@ -241,14 +241,14 @@ class Mps:
             if (line[0] == "FR" or
                 line[0] == "FX"):
                 print "Bound type", line[0], "not supported."
-                continue
+                raise NotImplementedError
 
             if (len(line) < 3 or len(line) > 4):
                 print "Expected exactly 4 entries in the BOUNDS section."
                 print "Read: ", line
                 raise IndexError
 
-            if(line[0] == "UP"):
+            if (line[0] == "UP"):
                 bup.append(float(line[-1]))
                 upx.append(self.colNames[line[-2]])
 
