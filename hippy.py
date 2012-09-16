@@ -17,7 +17,7 @@
 import sys
 from numpy import dot
 from scipy.sparse import spdiags
-from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import factorized
 from mps import Mps
 from scale import Scale
 from sparsevector import Sparsevector
@@ -42,7 +42,8 @@ class normalequations:
         self.f = w / z
         self.D = 1.0 / (self.d + self.f.todense())
         n = len(self.D)
-        self.M = self.A * spdiags(self.D, 0, n, n) * self.A.T
+        M = self.A * spdiags(self.D, 0, n, n) * self.A.T
+        self.factsolve = factorized(M)
 
     def solve(self, xib, xic, xim, xiu, xiz):
         '''Solve the normal equations system for the given right-hand side.'''
@@ -50,7 +51,7 @@ class normalequations:
         v = xiz / self.z - xiu * self.f
         r = xic - t + v.todense()
         rhs = self.A * (self.D * r) + xib
-        dy = spsolve(self.M, rhs)
+        dy = self.factsolve(rhs)
         dx = self.D * (self.A.T * dy - r)
         ds = t - dx * self.d
         xx = dx[xiu.idx]
@@ -186,10 +187,10 @@ class hippy:
         for i in self.u.idx:
             d[i] = 0.5
         F = A * spdiags(d, 0, self.n, self.n)
-        M = F * A.T
-        v = spsolve(M, self.b - F * u)
+        factsolve = factorized(F * A.T)
+        v = factsolve(self.b - F * u)
         x = F.T * v + d * u
-        y = spsolve(M, F * self.c)
+        y = factsolve(F * self.c)
         s = d * self.c - F.T * y
         z = self.u - x[self.u.idx]
         w = Sparsevector(self.n, -s[self.u.idx], self.u.idx)
