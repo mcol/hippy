@@ -21,8 +21,10 @@ israel          22
 kb2             15
 lotfi           19
 maros-r7        21S
+pilotnov        29
 qap8            9
 qap12           22S
+recipe          12
 sc105           9
 sc50a           9
 sc50b           8
@@ -39,11 +41,14 @@ sctap2          12S
 sctap3          14S
 share1b         21S
 share2b         14
+shell           26
 ship08l         15S
 ship08s         13S
 ship12l         16S
 ship12s         17S
 sierra          22S
+standata        18
+standmps        25
 stocfor1        12
 stocfor2        25S
 truss           18S

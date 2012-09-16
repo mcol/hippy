@@ -252,8 +252,7 @@ class Mps:
                 # skip an empty line
                 continue
 
-            if (line[0] == "FR" or
-                line[0] == "FX"):
+            if (line[0] == "FR"):
                 print "Bound type", line[0], "not supported."
                 raise NotImplementedError
 
@@ -262,13 +261,22 @@ class Mps:
                 print "Read: ", line
                 raise IndexError
 
+            value = float(line[-1])
+            index = self.colNames[line[-2]]
+
             if (line[0] == "UP"):
-                bup.append(float(line[-1]))
-                upx.append(self.colNames[line[-2]])
+                bup.append(value)
+                upx.append(index)
 
             elif (line[0] == "LO"):
-                blo.append(float(line[-1]))
-                lox.append(self.colNames[line[-2]])
+                blo.append(value)
+                lox.append(index)
+
+            elif (line[0] == "FX"):
+                bup.append(value)
+                upx.append(index)
+                blo.append(value)
+                lox.append(index)
 
         self.bup, self.upx = bup, upx
         self.blo, self.lox = blo, lox
