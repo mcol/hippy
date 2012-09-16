@@ -106,14 +106,16 @@ class Mps:
         for line in mps:
 
             line = line.split()
-            if (len(line) == 0):
-                continue
-            if (line[0] == "COLUMNS"):
-                return
-            elif (line[0] == "N"):
-                self.objName = line[1]
-                continue
-            elif (line[0] == "NAME" or line[0] == "ROWS" or line[0][0] == "*"):
+            try:
+                if line[0] == "COLUMNS":
+                    return
+                if line[0] == "N":
+                    self.objName = line[1]
+                    continue
+                if line[0] == "NAME" or line[0] == "ROWS" or line[0][0] == "*":
+                    continue
+            except IndexError:
+                # skip an empty line
                 continue
 
             if (len(line) != 2):
@@ -132,9 +134,13 @@ class Mps:
         for line in mps:
 
             line = line.split()
-            if (line[0] == "RHS"):
-                break
-            elif (line[0][0] == "*"):
+            try:
+                if line[0] == "RHS":
+                    break
+                if line[0][0] == "*":
+                    continue
+            except IndexError:
+                # skip an empty line
                 continue
 
             if (len(line) != 3 and len(line) != 5):
@@ -199,9 +205,13 @@ class Mps:
         for line in mps:
 
             line = line.split()
-            if (line[0] == "ENDATA" or line[0] == "BOUNDS"):
-                break
-            elif (line[0] == "*"):
+            try:
+                if line[0] == "ENDATA" or line[0] == "BOUNDS":
+                    break
+                if line[0] == "*":
+                    continue
+            except IndexError:
+                # skip an empty line
                 continue
 
             if (len(line) < 2 or len(line) > 5):
@@ -233,9 +243,13 @@ class Mps:
         for line in mps:
 
             line = line.split()
-            if (line[0] == "ENDATA"):
-                break
-            elif (line[0] == "*"):
+            try:
+                if line[0] == "ENDATA":
+                    break
+                if line[0] == "*":
+                    continue
+            except IndexError:
+                # skip an empty line
                 continue
 
             if (line[0] == "FR" or
