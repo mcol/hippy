@@ -17,7 +17,7 @@
 import sys
 from numpy import dot
 from scipy.sparse import spdiags
-from scipy.sparse.linalg import factorized
+from scipy.sparse.linalg import factorized, use_solver
 from mps import Mps
 from scale import Scale
 from sparsevector import Sparsevector
@@ -43,7 +43,13 @@ class normalequations:
         self.D = 1.0 / (self.d + self.f.todense())
         n = len(self.D)
         M = self.A * spdiags(self.D, 0, n, n) * self.A.T
-        self.factsolve = factorized(M)
+        try:
+            self.factsolve = factorized(M)
+        except RuntimeError:
+            # UMFPACK_ERROR_out_of_memory
+            print "Switching type of LU factorization"
+            use_solver(useUmfpack = False)
+            self.factsolve = factorized(M)
 
     def solve(self, xib, xic, xim, xiu, xiz):
         '''Solve the normal equations system for the given right-hand side.'''
