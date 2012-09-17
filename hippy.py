@@ -83,9 +83,9 @@ class hippy:
         dx, dy, ds, dz, dw = self.newton(NE, self.x, self.s, self.z, self.w)
         dx, dy, ds, dz, dw = self.mehrotra(NE, dx, dy, ds, dz, dw)
         self.alphap = 0.9995 * min(stepsize(self.x, dx),
-                                   stepsize(self.z.array(), dz.array()))
+                                   stepsize(self.z.data(), dz.data()))
         self.alphad = 0.9995 * min(stepsize(self.s, ds),
-                                   stepsize(self.w.array(), dw.array()))
+                                   stepsize(self.w.data(), dw.data()))
 
         self.makestep(dx, dy, ds, dz, dw)
         self.xi()
@@ -98,8 +98,8 @@ class hippy:
 
     def sigmamu(self, dx, ds, dz, dw):
         '''Compute the target barrier parameter for Mehrotra's corrector.'''
-        alphap = min(stepsize(self.x, dx), stepsize(self.z.array(), dz.array()))
-        alphad = min(stepsize(self.s, ds), stepsize(self.w.array(), dw.array()))
+        alphap = min(stepsize(self.x, dx), stepsize(self.z.data(), dz.data()))
+        alphad = min(stepsize(self.s, ds), stepsize(self.w.data(), dw.data()))
         x = self.x + alphap * dx
         s = self.s + alphad * ds
         z = self.z + alphap * dz
@@ -242,13 +242,13 @@ class hippy:
 
     def average(self, x, s, z, w):
         '''Compute the average complementarity gap.'''
-        gap = dot(x, s) + dot(z.array(), w.array())
+        gap = dot(x, s) + dot(z.data(), w.data())
         return gap / (self.n + len(z))
 
     def xi(self):
         '''Compute duality gap, complementarity gap and infeasibilities.'''
         self.pobj = dot(self.c, self.x)
-        self.dobj = dot(self.b, self.y) - dot(self.u.array(), self.w.array())
+        self.dobj = dot(self.b, self.y) - dot(self.u.data(), self.w.data())
         self.gap = self.pobj - self.dobj
         self.mu  = self.average(self.x, self.s, self.z, self.w)
         self.xib = self.b - self.A * self.x

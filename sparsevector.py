@@ -4,7 +4,7 @@
 #
 # Implementation of a sparse vector class.
 #
-# Copyright (c) 2008 Marco Colombo
+# Copyright (c) 2008, 2012 Marco Colombo
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -87,6 +87,6 @@ class Sparsevector:
             v[self.idx[i]] = self.val[i]
         return array(v)
 
-    def array(self):
+    def data(self):
         '''Return the array of sparse values.'''
         return self.val
