@@ -1,0 +1,8 @@
+NAME          ER004
+ROWS
+ E  R09
+COLUMNS
+    X01       R09               .301   X48                -1.
+RHS
+BOUNDS
+ENDATA

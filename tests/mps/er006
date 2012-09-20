@@ -1,0 +1,10 @@
+NAME          ER006
+ROWS
+ E  R09
+COLUMNS
+    X01       R09                -1.
+RHS
+    B         R09               310.
+BOUNDS
+ FX BOUNDROW  X48                 1.
+ENDATA

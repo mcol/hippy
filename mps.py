@@ -19,6 +19,10 @@ from scipy import sparse
 
 class Mps:
 
+    # common error messages
+    errUnknownRow = "Unknown row '%s' in the %s section."
+    errUnknownCol = "Unknown column '%s' in the %s section."
+
     def __init__(self, mpsfile):
         '''Constructor.'''
         self.mpsfile = mpsfile
@@ -108,7 +112,7 @@ class Mps:
             line = line.split()
             try:
                 if line[0] == "COLUMNS":
-                    return
+                    break
                 if line[0] == "N":
                     self.objName = line[1]
                     continue
@@ -126,6 +130,10 @@ class Mps:
             self.rowNames[line[1]] = rowIndex
             self.rowTypes[line[1]] = line[0]
             rowIndex += 1
+
+        if len(self.rowNames) == 0:
+            print "Empty ROWS section in MPS file."
+            raise ValueError
 
     def __parseColumns(self, mps):
 
@@ -158,17 +166,29 @@ class Mps:
             if (line[1] == self.objName):
                 obj[indx - 1] = float(line[2])
             else:
-                rows.append(self.rowNames[line[1]])
-                data.append(float(line[2]))
-                nnnz += 1
+                try:
+                    rows.append(self.rowNames[line[1]])
+                    data.append(float(line[2]))
+                    nnnz += 1
+                except KeyError:
+                    print self.errUnknownRow % (line[1], "COLUMNS")
+                    raise ValueError
 
             if len(line) > 3:
                 if (line[3] == self.objName):
                     obj[indx - 1] = float(line[4])
                     continue
-                rows.append(self.rowNames[line[3]])
-                data.append(float(line[4]))
-                nnnz += 1
+                try:
+                    rows.append(self.rowNames[line[3]])
+                    data.append(float(line[4]))
+                    nnnz += 1
+                except KeyError:
+                    print self.errUnknownRow % (line[3], "COLUMNS")
+                    raise ValueError
+
+        if len(self.colNames) == 0:
+            print "Empty COLUMNS section in MPS file."
+            raise ValueError
 
         # add slacks for inequality constraints
         keys = self.rowTypes.keys()
@@ -222,11 +242,19 @@ class Mps:
             index = len(line) - 1
             while (index > 0):
                 try:
+                    val = float(line[index])
                     row = self.rowNames[line[index - 1]]
                 except KeyError:
                     # ignore the assignment of right-hand side to the objective
                     if (self.objName == line[index - 1]): pass
-                    else: raise
+                    else:
+                        print self.errUnknownRow % (line[index - 1], "RHS")
+                        raise ValueError
+                except ValueError:
+                    # line[index] is not a numerical value
+                    print "Unexpected field ordering in the RHS section."
+                    print "Read: ", line
+                    raise IndexError
 
                 rhs[row] = float(line[index])
                 line = line[:-2]
@@ -261,8 +289,12 @@ class Mps:
                 print "Read: ", line
                 raise IndexError
 
-            value = float(line[-1])
-            index = self.colNames[line[-2]]
+            try:
+                value = float(line[-1])
+                index = self.colNames[line[-2]]
+            except KeyError:
+                print self.errUnknownCol % (line[-2], "BOUNDS")
+                raise ValueError
 
             if (line[0] == "UP"):
                 bup.append(value)
