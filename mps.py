@@ -33,11 +33,9 @@ class Mps:
         self.colNames = {}
         self.objName  = None
 
-    def readMps(self):
-        '''Read the MPS file.'''
         try:
+            # read the MPS file
             mps = open(self.mpsfile, 'r')
-
             print "Reading file", self.mpsfile + "."
 
             self.__parseRows(mps)

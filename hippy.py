@@ -120,10 +120,8 @@ class hippy:
 
     def read(self):
         '''Read the MPS file.'''
-        mpsdata = Mps(self.mpsfile)
-
         try:
-            mpsdata.readMps()
+            mpsdata = Mps(self.mpsfile)
         except (IOError, IndexError, ValueError):
             return sys.exit(1)
 
