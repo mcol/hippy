@@ -14,7 +14,7 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
-from numpy import array
+from numpy import array, delete
 
 class Sparsevector:
 
@@ -29,6 +29,10 @@ class Sparsevector:
 
     def __setitem__(self, index, value):
         self.val[index] = value
+
+    def __delitem__(self, index):
+        self.val = delete(self.val, index)
+        del self.idx[index]
 
     def __len__(self):
         return len(self.idx)
