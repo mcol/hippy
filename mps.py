@@ -20,6 +20,7 @@ from scipy import sparse
 class Mps:
 
     # common error messages
+    errNumEntries = "Expected exactly %s entries in the %s section."
     errUnknownRow = "Unknown row '%s' in the %s section."
     errUnknownCol = "Unknown column '%s' in the %s section."
 
@@ -123,7 +124,7 @@ class Mps:
                 continue
 
             if (len(line) != 2):
-                print "Expected exactly 2 entries in the ROWS section."
+                print self.errNumEntries % ("2", "ROWS")
                 print "Read: ", line
                 raise IndexError
 
@@ -152,7 +153,7 @@ class Mps:
                 continue
 
             if (len(line) != 3 and len(line) != 5):
-                print "Expected exactly 3 or 5 entries in the COLUMNS section."
+                print self.errNumEntries % ("3 or 5", "COLUMNS")
                 print "Read: ", line
                 raise IndexError
 
@@ -235,7 +236,7 @@ class Mps:
                 continue
 
             if (len(line) < 2 or len(line) > 5):
-                print "Expected 1 or 2 pairs of entries in the RHS section."
+                print self.errNumEntries % ("3 or 5", "RHS")
                 print "Read: ", line
                 raise IndexError
 
@@ -285,7 +286,7 @@ class Mps:
                 raise NotImplementedError
 
             if (len(line) < 3 or len(line) > 4):
-                print "Expected exactly 4 entries in the BOUNDS section."
+                print self.errNumEntries % ("4", "BOUNDS")
                 print "Read: ", line
                 raise IndexError
 
