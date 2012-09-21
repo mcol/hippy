@@ -21,6 +21,7 @@ class Mps:
 
     # common error messages
     errNumEntries = "Expected exactly %s entries in the %s section."
+    errFieldOrder = "Unexpected field ordering in the %s section."
     errUnknownRow = "Unknown row '%s' in the %s section."
     errUnknownCol = "Unknown column '%s' in the %s section."
 
@@ -164,28 +165,27 @@ class Mps:
                 indx += 1
                 obj.append(0)
 
-            if (line[1] == self.objName):
-                obj[indx - 1] = float(line[2])
-            else:
+            # no need to access the variable name anymore
+            line = line[1:]
+            while len(line) > 0:
+                rowname = line[0]
                 try:
-                    rows.append(self.rowNames[line[1]])
-                    data.append(float(line[2]))
-                    nnnz += 1
+                    if rowname == self.objName:
+                        obj[indx - 1] = float(line[1])
+                    else:
+                        rows.append(self.rowNames[rowname])
+                        data.append(float(line[1]))
+                        nnnz += 1
                 except KeyError:
-                    print self.errUnknownRow % (line[1], "COLUMNS")
+                    print self.errUnknownRow % (rowname, "COLUMNS")
                     raise ValueError
+                except ValueError:
+                    print self.errFieldOrder % "COLUMNS"
+                    print "Read:" , line
+                    raise IndexError
 
-            if len(line) > 3:
-                if (line[3] == self.objName):
-                    obj[indx - 1] = float(line[4])
-                    continue
-                try:
-                    rows.append(self.rowNames[line[3]])
-                    data.append(float(line[4]))
-                    nnnz += 1
-                except KeyError:
-                    print self.errUnknownRow % (line[3], "COLUMNS")
-                    raise ValueError
+                # remove the parts of the line just parsed
+                line = line[2:]
 
         if len(self.colNames) == 0:
             print "Empty COLUMNS section in MPS file."
@@ -253,7 +253,7 @@ class Mps:
                         raise ValueError
                 except ValueError:
                     # line[index] is not a numerical value
-                    print "Unexpected field ordering in the RHS section."
+                    print self.errFieldOrder % "RHS"
                     print "Read: ", line
                     raise IndexError
 

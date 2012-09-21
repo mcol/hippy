@@ -1,0 +1,9 @@
+NAME          ER008
+ROWS
+ E  R09
+COLUMNS
+    X01       R09                R10
+RHS
+    B         R09                310.
+BOUNDS
+ENDATA
