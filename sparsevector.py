@@ -76,7 +76,7 @@ class Sparsevector:
     def __neg__(self):
         return Sparsevector(self.dim, -self.val, self.idx)
 
-    def __repr__(self):
+    def __str__(self):
         fmt = "(%f, %d) "
         str = "[ "
         for i in range(len(self)):
