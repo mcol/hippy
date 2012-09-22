@@ -54,6 +54,9 @@ class TestMps(unittest.TestCase):
     def test_NotImplemented000(self):
         self.assertRaises(NotImplementedError, Mps, "mps/un000")
 
+    def test_NotImplemented001(self):
+        self.assertRaises(NotImplementedError, Mps, "mps/un001")
+
 
 if __name__ == '__main__':
     unittest.main()

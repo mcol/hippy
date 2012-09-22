@@ -122,7 +122,7 @@ class hippy:
         '''Read the MPS file.'''
         try:
             mpsdata = Mps(self.mpsfile)
-        except (IOError, IndexError, ValueError):
+        except (IOError, IndexError, NotImplementedError, ValueError):
             return sys.exit(1)
 
         self.A, self.b, self.c, bounds = mpsdata.getdata()

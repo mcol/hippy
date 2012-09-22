@@ -1,0 +1,11 @@
+NAME          UN001
+ROWS
+ E  R09
+ E  R10
+COLUMNS
+    X01       R09                -1.
+RHS
+              R09               310.  R10          2.
+BOUNDS
+RANGES
+ENDATA

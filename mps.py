@@ -279,6 +279,10 @@ class Mps:
                 # skip an empty line
                 continue
 
+            if line[0] == "RANGES":
+                print "RANGES section not supported."
+                raise NotImplementedError
+
             if (line[0] == "FR"):
                 print "Bound type", line[0], "not supported."
                 raise NotImplementedError
