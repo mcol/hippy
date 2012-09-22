@@ -24,6 +24,7 @@ class Mps:
     errFieldOrder = "Unexpected field ordering in the %s section."
     errUnknownRow = "Unknown row '%s' in the %s section."
     errUnknownCol = "Unknown column '%s' in the %s section."
+    errLastParsed = "\nLast line parsed: %s."
 
     def __init__(self, mpsfile):
         '''Constructor.'''
@@ -36,7 +37,6 @@ class Mps:
         try:
             # read the MPS file
             mps = open(self.mpsfile, 'r')
-            print "Reading file", self.mpsfile + "."
 
             self.__parseRows(mps)
             self.__parseColumns(mps)
@@ -48,11 +48,8 @@ class Mps:
             mps.close()
 
         except IOError:
-            print "Could not open file '" + self.mpsfile + "'."
-            raise IOError
-        except (IndexError, NotImplementedError):
-            print "Parsing of the MPS file interrupted."
-            raise
+            msg = "Could not open file '" + self.mpsfile + "'."
+            raise IOError(msg)
 
     def getdata(self):
         '''Get the coefficient matrix and vectors from the MPS data.'''
@@ -123,17 +120,17 @@ class Mps:
                 continue
 
             if (len(line) != 2):
-                print self.errNumEntries % ("2", "ROWS")
-                print "Read: ", line
-                raise IndexError
+                msg = self.errNumEntries % ("2", "ROWS")
+                msg += self.errLastParsed % str(line)
+                raise IndexError(msg)
 
             self.rowNames[line[1]] = rowIndex
             self.rowTypes[line[1]] = line[0]
             rowIndex += 1
 
         if len(self.rowNames) == 0:
-            print "Empty ROWS section in MPS file."
-            raise ValueError
+            msg = "Empty ROWS section in MPS file."
+            raise ValueError(msg)
 
     def __parseColumns(self, mps):
 
@@ -152,9 +149,9 @@ class Mps:
                 continue
 
             if (len(line) != 3 and len(line) != 5):
-                print self.errNumEntries % ("3 or 5", "COLUMNS")
-                print "Read: ", line
-                raise IndexError
+                msg = self.errNumEntries % ("3 or 5", "COLUMNS")
+                msg += self.errLastParsed % str(line)
+                raise IndexError(msg)
 
             if line[0] != prev:
                 self.colNames[line[0]] = indx
@@ -175,19 +172,19 @@ class Mps:
                         data.append(float(line[1]))
                         nnnz += 1
                 except KeyError:
-                    print self.errUnknownRow % (rowname, "COLUMNS")
-                    raise ValueError
+                    msg = self.errUnknownRow % (rowname, "COLUMNS")
+                    raise ValueError(msg)
                 except ValueError:
-                    print self.errFieldOrder % "COLUMNS"
-                    print "Read:" , line
-                    raise IndexError
+                    msg = self.errFieldOrder % "COLUMNS"
+                    msg += self.errLastParsed % str(line)
+                    raise IndexError(msg)
 
                 # remove the parts of the line just parsed
                 line = line[2:]
 
         if len(self.colNames) == 0:
-            print "Empty COLUMNS section in MPS file."
-            raise ValueError
+            msg = "Empty COLUMNS section in MPS file."
+            raise ValueError(msg)
 
         # add slacks for inequality constraints
         keys = self.rowTypes.keys()
@@ -234,9 +231,9 @@ class Mps:
                 continue
 
             if (len(line) < 2 or len(line) > 5):
-                print self.errNumEntries % ("3 or 5", "RHS")
-                print "Read: ", line
-                raise IndexError
+                msg = self.errNumEntries % ("3 or 5", "RHS")
+                msg += self.errLastParsed % str(line)
+                raise IndexError(msg)
 
             index = len(line) - 1
             while (index > 0):
@@ -247,13 +244,13 @@ class Mps:
                     # ignore the assignment of right-hand side to the objective
                     if (self.objName == line[index - 1]): pass
                     else:
-                        print self.errUnknownRow % (line[index - 1], "RHS")
-                        raise ValueError
+                        msg = self.errUnknownRow % (line[index - 1], "RHS")
+                        raise ValueError(msg)
                 except ValueError:
                     # line[index] is not a numerical value
-                    print self.errFieldOrder % "RHS"
-                    print "Read: ", line
-                    raise IndexError
+                    msg = self.errFieldOrder % "RHS"
+                    msg += self.errLastParsed % str(line)
+                    raise IndexError(msg)
 
                 rhs[row] = float(line[index])
                 line = line[:-2]
@@ -280,24 +277,24 @@ class Mps:
                 continue
 
             if line[0] == "RANGES":
-                print "RANGES section not supported."
-                raise NotImplementedError
+                msg = "RANGES section not supported."
+                raise NotImplementedError(msg)
 
             if (line[0] == "FR"):
-                print "Bound type", line[0], "not supported."
-                raise NotImplementedError
+                msg = "Bound type FR not supported."
+                raise NotImplementedError(msg)
 
             if (len(line) < 3 or len(line) > 4):
-                print self.errNumEntries % ("4", "BOUNDS")
-                print "Read: ", line
-                raise IndexError
+                msg = self.errNumEntries % ("4", "BOUNDS")
+                msg += self.errLastParsed % str(line)
+                raise IndexError(msg)
 
             try:
                 value = float(line[-1])
                 index = self.colNames[line[-2]]
             except KeyError:
-                print self.errUnknownCol % (line[-2], "BOUNDS")
-                raise ValueError
+                msg = self.errUnknownCol % (line[-2], "BOUNDS")
+                raise ValueError(msg)
 
             if (line[0] == "UP"):
                 bup.append(value)

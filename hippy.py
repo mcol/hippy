@@ -121,8 +121,14 @@ class hippy:
     def read(self):
         '''Read the MPS file.'''
         try:
+            print "Reading file", self.mpsfile + "."
             mpsdata = Mps(self.mpsfile)
-        except (IOError, IndexError, NotImplementedError, ValueError):
+        except IOError as e:
+            print e
+            return sys.exit(1)
+        except (IndexError, NotImplementedError, ValueError) as e:
+            print e
+            print "Parsing of the MPS file interrupted."
             return sys.exit(1)
 
         self.A, self.b, self.c, bounds = mpsdata.getdata()
