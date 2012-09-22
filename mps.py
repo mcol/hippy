@@ -52,7 +52,7 @@ class Mps:
             raise IOError
         except (IndexError, NotImplementedError):
             print "Parsing of the MPS file interrupted."
-            raise IndexError
+            raise
 
     def getdata(self):
         '''Get the coefficient matrix and vectors from the MPS data.'''
