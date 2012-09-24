@@ -138,7 +138,16 @@ class hippy:
         lowVal, lowIdx = bounds[2:4]
         self.u = Sparsevector(self.n, uppVal, uppIdx)
         self.l = Sparsevector(self.n, lowVal, lowIdx)
+
+    def preprocess(self):
+        '''Preprocess the problem before solving it.'''
         self.shiftbounds()
+        self.scale()
+
+    def postprocess(self):
+        '''Postprocess the problem after having solved it.'''
+        self.unscale()
+        self.removeshift()
 
     def shiftbounds(self):
         '''Shift the lower bounded variables.'''
@@ -301,9 +310,10 @@ class hippy:
 
     def solve(self):
         '''Solve the problem, from the MPS file to the optimal solution.'''
-        self.scale()
+        self.preprocess()
         self.init()
         self.solver()
+        self.postprocess()
         self.info()
         return self.status
 
@@ -321,8 +331,6 @@ class hippy:
             if abs(self.gap) > 2 * abs(oldgap) and self.iter > 3:
                 if self.mu < self.optol:
                     self.status = 'suboptimal'
-                    self.unscale()
-                    self.removeshift()
                 else:
                     self.status = 'failed'
                 return
@@ -331,8 +339,6 @@ class hippy:
             self.status = 'maxiters'
         else:
             self.status = 'optimal'
-            self.unscale()
-            self.removeshift()
 
     def getsolution(self):
         '''Retrieve the solution vectors.'''
