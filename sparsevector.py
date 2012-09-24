@@ -14,6 +14,7 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
+from bisect import bisect_left
 from numpy import array, delete
 
 class Sparsevector:
@@ -22,7 +23,7 @@ class Sparsevector:
         '''Constructor.'''
         self.dim = size
         self.val = array(values)
-        self.idx = indices
+        self.idx = indices[:]
 
     def __getitem__(self, index):
         return self.val[index]
@@ -83,6 +84,22 @@ class Sparsevector:
             str += fmt % (self.val[i], self.idx[i])
         str += "]"
         return str
+
+    def copy(self):
+        '''Copy the sparse vector.'''
+        other = Sparsevector(self.dim, self.val, self.idx)
+        return other
+
+    def remove(self, j):
+        '''Remove the selected index changing the dimension of the vector.'''
+        if j < 0 or j > len(self.idx):
+            raise IndexError("Element index out of bounds.")
+
+        pos = bisect_left(self.idx, self.idx[j])
+        del self[j]
+        for i in xrange(pos, len(self.idx)):
+            self.idx[i] -= 1
+        self.dim -= 1
 
     def todense(self):
         '''Return a dense version of the vector.'''

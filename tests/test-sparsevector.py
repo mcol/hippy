@@ -124,6 +124,28 @@ class TestSparsevector(unittest.TestCase):
         new = self.x
         self.assertEqual(self.v, self.x)
 
+    def test_remove01(self):
+        a = Sparsevector(10, [1.0, 2.0, 4.0], [2, 3, 9])
+        self.assertRaises(IndexError, a.remove, 4)
+
+    def test_remove02(self):
+        a = Sparsevector(10, [1.0, 2.0, 4.0], [2, 4, 9])
+        b = Sparsevector(9, [2.0, 4.0], [3, 8])
+        a.remove(0)
+        self.assertEqual(a, b)
+
+    def test_remove03(self):
+        a = Sparsevector(10, [1.0, 2.0, 4.0], [2, 4, 9])
+        b = Sparsevector(9, [1.0, 4.0], [2, 8])
+        a.remove(1)
+        self.assertEqual(a, b)
+
+    def test_remove04(self):
+        a = Sparsevector(10, [1.0, 2.0, 4.0], [2, 4, 9])
+        b = Sparsevector(9, [1.0, 2.0], [2, 4])
+        a.remove(2)
+        self.assertEqual(a, b)
+
     def test_todense01(self):
         res = self.v.todense()
         self.assertEqual(res.all(), self.vdense.all())
