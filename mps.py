@@ -14,6 +14,7 @@
 # See http://www.gnu.org/licenses/gpl.txt for a copy of the license.
 #
 
+from collections import OrderedDict
 from numpy import array, unique
 from scipy import sparse
 
@@ -29,9 +30,10 @@ class Mps:
     def __init__(self, mpsfile):
         '''Constructor.'''
         self.mpsfile = mpsfile
-        self.rowNames = {}
+        self.rowNames = OrderedDict()
         self.rowTypes = {}
         self.colNames = {}
+        self.rhsNames = {}
         self.objName  = None
 
         try:
@@ -71,24 +73,21 @@ class Mps:
 
         # get an ordered list of the row indices
         u = unique(self.rows)
-
-        # original length of the rhs vector
-        rhslen = len(self.rhs)
+        idxempty = [x for x in range(len(self.rowNames)) if x not in u]
 
         # go through all row indices to compute the adjustment
-        for i in range(len(u)):
-            while (u[i] != i + removed):
-                del self.rhs[i]
+        keys, idx = self.rowNames.keys(), 0
+        for key in keys:
+            if idx in idxempty:
+                del self.rowNames[key]
+                del self.rowTypes[key]
+                try:
+                    del self.rhsNames[key]
+                except KeyError:
+                    pass
                 removed += 1
-                adjust.append(removed)
             adjust.append(removed)
-
-        # check that we have removed all empty rows from the rhs
-        rem = rhslen - (len(u) + removed)
-
-        # remove the empty rows at the end of the rhs vector
-        if (rem > 0):
-            del self.rhs[-rem:]
+            idx += 1
 
         # from each row index subtract the number of removed rows
         try:
@@ -96,6 +95,17 @@ class Mps:
         except:
             print "Error in __deleteEmptyRows()."
             raise
+
+        # update the indices stored in self.rowNames and create a dense rhs
+        self.rhs = [0] * len(self.rowNames)
+        idx = 0
+        for key in self.rowNames.iterkeys():
+            self.rowNames[key] = idx
+            try:
+                self.rhs[idx] = self.rhsNames[key]
+            except:
+                pass
+            idx += 1
 
         if (removed):
             print "Removed %d empty rows." % removed
@@ -212,11 +222,6 @@ class Mps:
         self.data, self.rows, self.ptrs, self.obj = data, rows, ptrs, obj
 
     def __parseRhs(self, mps):
-        # create a dense empty right-hand side
-        rhs = [0]*len(self.rowNames)
-
-        # declare the variable to be set inside a try block but used outside
-        row = 0
 
         for line in mps:
 
@@ -238,8 +243,9 @@ class Mps:
             index = len(line) - 1
             while (index > 0):
                 try:
-                    val = float(line[index])
-                    row = self.rowNames[line[index - 1]]
+                    row = line[index - 1]
+                    self.rowNames[row] # ensure that this row name exists
+                    self.rhsNames[row] = float(line[index])
                 except KeyError:
                     # ignore the assignment of right-hand side to the objective
                     if (self.objName == line[index - 1]): pass
@@ -252,11 +258,8 @@ class Mps:
                     msg += self.errLastParsed % str(line)
                     raise IndexError(msg)
 
-                rhs[row] = float(line[index])
                 line = line[:-2]
                 index -= 2
-
-        self.rhs = rhs
 
     def __parseBounds(self, mps):
 

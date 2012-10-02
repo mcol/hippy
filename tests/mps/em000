@@ -1,0 +1,14 @@
+NAME          EM000
+ROWS
+ N  OBJ
+ E  EMPTY
+ L  R09
+ L  R10
+COLUMNS
+    X01       OBJ                 1.
+    X01       R09                -1.
+    X01       R10                -1.
+RHS
+              R09               310.  R10          2.
+BOUNDS
+ENDATA

@@ -46,7 +46,7 @@ class TestMps(unittest.TestCase):
         self.assertRaises(ValueError, Mps, "mps/er006")
 
     def test_Error007(self):
-        self.assertRaises(IndexError, Mps, "mps/er007")
+        self.assertRaises(ValueError, Mps, "mps/er007")
 
     def test_Error008(self):
         self.assertRaises(IndexError, Mps, "mps/er008")
@@ -56,6 +56,10 @@ class TestMps(unittest.TestCase):
 
     def test_NotImplemented001(self):
         self.assertRaises(NotImplementedError, Mps, "mps/un001")
+
+    def test_DeleteEmptyRows000(self):
+        mps = Mps("mps/em000")
+        self.assertEqual(mps.rowNames.keys(), ["R09", "R10"])
 
 
 if __name__ == '__main__':
