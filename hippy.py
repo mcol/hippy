@@ -15,8 +15,8 @@
 #
 
 import sys
-from numpy import dot
-from scipy.sparse import spdiags
+from numpy import append, dot
+from scipy.sparse import csc_matrix, spdiags
 from scipy.sparse.linalg import factorized, use_solver
 from mps import Mps
 from scale import Scale
@@ -132,6 +132,7 @@ class hippy:
             return sys.exit(1)
 
         self.A, self.b, self.c, bounds = mpsdata.getdata()
+        self.rowNames, self.rowTypes = mpsdata.rowNames, mpsdata.rowTypes
         self.m = len(self.b)
         self.n = len(self.c)
         uppVal, uppIdx = bounds[0:2]
@@ -142,11 +143,13 @@ class hippy:
     def preprocess(self):
         '''Preprocess the problem before solving it.'''
         self.shiftbounds()
+        self.addslacks()
         self.scale()
 
     def postprocess(self):
         '''Postprocess the problem after having solved it.'''
         self.unscale()
+        self.removeslacks()
         self.removeshift()
 
     def shiftbounds(self):
@@ -191,6 +194,50 @@ class hippy:
             self.u[i] *= factor
             self.z[i] /= factor
             self.w[i] /= factor
+
+    def addslacks(self):
+        '''Add slack variables to inequality constraints.'''
+        self.nslacks, nnnz = 0, self.A.nnz
+        data, rows, ptrs = [], [], []
+        for key in self.rowTypes.iterkeys():
+            if self.rowTypes[key] is 'E':
+                continue
+            if self.rowTypes[key] is 'L':
+                data.append(1.0)
+            elif self.rowTypes[key] is 'G':
+                data.append(-1.0)
+
+            rows.append(self.rowNames[key])
+            ptrs.append(nnnz)
+            self.nslacks += 1
+            nnnz += 1
+
+        # add the last element
+        ptrs.append(nnnz)
+
+        if self.nslacks == 0:
+            return
+
+        # extend the matrix with the slacks
+        data = append(self.A.data, data)
+        rows = append(self.A.indices, rows)
+        ptrs = append(self.A.indptr[:-1], ptrs)
+        self.A = csc_matrix((data, rows, ptrs))
+        self.c = append(self.c, [0] * self.nslacks)
+        self.u.dim = self.l.dim = self.n = len(self.c)
+
+        # report the number of slacks added
+        print "Added %d slacks variables." % self.nslacks
+
+    def removeslacks(self):
+       '''Remove the slack variables.'''
+       if self.nslacks == 0:
+           return
+       self.n -= self.nslacks
+       self.c = self.c[:self.n]
+       self.x = self.x[:self.n]
+       self.s = self.s[:self.n]
+       self.u.dim = self.l.dim = self.n
 
     def init(self):
         '''Compute the initial iterate according to Mehrotra's heuristic.'''

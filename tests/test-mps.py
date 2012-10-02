@@ -61,6 +61,14 @@ class TestMps(unittest.TestCase):
         mps = Mps("mps/em000")
         self.assertEqual(mps.rowNames.keys(), ["R09", "R10"])
 
+    def test_DeleteEmptyRows001(self):
+        mps = Mps("mps/em001")
+        self.assertEqual(mps.rowNames.keys(), ["R09", "R10"])
+
+    def test_DeleteEmptyRows002(self):
+        mps = Mps("mps/em002")
+        self.assertEqual(mps.rowNames.keys(), ["R09", "R10", "R11"])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -196,29 +196,8 @@ class Mps:
             msg = "Empty COLUMNS section in MPS file."
             raise ValueError(msg)
 
-        # add slacks for inequality constraints
-        keys = self.rowTypes.keys()
-        for key in keys:
-            if self.rowTypes[key] is 'E':
-                continue
-            if self.rowTypes[key] is 'L':
-                data.append(1.0)
-            elif self.rowTypes[key] is 'G':
-                data.append(-1.0)
-
-            rows.append(self.rowNames[key])
-            ptrs.append(nnnz)
-            obj.append(0)
-            nnnz += 1
-
         # add the last element
         ptrs.append(nnnz)
-
-        # report the number of slacks added
-        nslacks = len(obj) - len(self.colNames)
-        if (nslacks > 0):
-            print "Added %d slacks variables." % nslacks
-
         self.data, self.rows, self.ptrs, self.obj = data, rows, ptrs, obj
 
     def __parseRhs(self, mps):
