@@ -1,5 +1,11 @@
-Hippy Interior Point methods in Python
---------------------------------------
+# Hippy Interior Point methods in Python
+
+This is an implementation of interior point methods written in Python. It
+can solve small linear programming problems written in MPS format.
+
+It is released under a GPL-2 license.
+
+## History
 
 Started on Tuesday 1 May 2007.
 
@@ -39,3 +45,6 @@ Implemented the lower bounds.
 
 16 September 2012
 Implemented the fixed bounds.
+
+27 March 2018
+Project uploaded to github.
